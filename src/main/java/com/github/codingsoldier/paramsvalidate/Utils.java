@@ -1,4 +1,4 @@
-package org.cpq.paramsvalidate;
+package com.github.codingsoldier.paramsvalidate;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 

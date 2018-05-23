@@ -1,4 +1,4 @@
-package org.cpq.paramsvalidate.bean;
+package com.github.codingsoldier.paramsvalidate.bean;
 
 import java.util.Set;
 

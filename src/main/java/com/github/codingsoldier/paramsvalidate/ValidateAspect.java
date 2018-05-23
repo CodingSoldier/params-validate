@@ -1,4 +1,4 @@
-package org.cpq.paramsvalidate;
+package com.github.codingsoldier.paramsvalidate;
 
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -8,8 +8,8 @@ import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Pointcut;
 import org.aspectj.lang.reflect.MethodSignature;
-import org.cpq.paramsvalidate.bean.ResultValidate;
-import org.cpq.paramsvalidate.bean.ValidateConfig;
+import com.github.codingsoldier.paramsvalidate.bean.ResultValidate;
+import com.github.codingsoldier.paramsvalidate.bean.ValidateConfig;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.web.context.request.RequestContextHolder;
@@ -33,7 +33,7 @@ public class ValidateAspect {
     @Autowired
     ValidateInterface validateInterface;
 
-    @Pointcut("@annotation(org.cpq.paramsvalidate.ParamsValidate)")
+    @Pointcut("@annotation(com.github.codingsoldier.paramsvalidate.ParamsValidate)")
     public void aspect(){}
 
     @Around("aspect()")

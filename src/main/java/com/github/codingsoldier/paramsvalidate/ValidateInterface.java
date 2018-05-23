@@ -1,7 +1,7 @@
-package org.cpq.paramsvalidate;
+package com.github.codingsoldier.paramsvalidate;
 
-import org.cpq.paramsvalidate.bean.ResultValidate;
-import org.cpq.paramsvalidate.bean.ValidateConfig;
+import com.github.codingsoldier.paramsvalidate.bean.ResultValidate;
+import com.github.codingsoldier.paramsvalidate.bean.ValidateConfig;
 
 import java.util.Map;
 
