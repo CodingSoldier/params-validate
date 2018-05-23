@@ -6,7 +6,7 @@
 
     <groupId>com.github.codingsoldier</groupId>
     <artifactId>params-validate</artifactId>
-    <version>1.0-SNAPSHOT</version>
+    <version>1.0-RELEASE</version>
 
     <name>params-validate</name>
     <description>params-validate</description>
