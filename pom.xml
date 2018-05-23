@@ -11,6 +11,12 @@
     <name>params-validate</name>
     <description>params-validate</description>
 
+    <parent>
+        <groupId>org.sonatype.oss</groupId>
+        <artifactId>oss-parent</artifactId>
+        <version>7</version>
+    </parent>
+
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
@@ -55,5 +61,26 @@
             </plugin>
         </plugins>
     </build>
+
+    <licenses>
+        <license>
+            <name>The Apache Software License, Version 2.0</name>
+            <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
+            <distribution>repo</distribution>
+        </license>
+    </licenses>
+    <scm>
+        <tag>master</tag>
+        <url>git@github.com:CodingSoldier/params-validate.git</url>
+        <connection>scm:git:git@github.com:CodingSoldier/params-validate.git</connection>
+        <developerConnection>scm:git:git@github.com:CodingSoldier/params-validate.git</developerConnection>
+    </scm>
+    <developers>
+        <developer>
+            <name>CodingSoldier</name>
+            <email>237053176@qq.com</email>
+            <organization>CodingSoldier</organization>
+        </developer>
+    </developers>
 
 </project>
