@@ -2,6 +2,9 @@ package com.github.codingsoldier.paramsvalidate.bean;
 
 import java.util.Set;
 
+/**
+ * author chenpiqian
+ */
 public class ResultValidate {
 
     private boolean isPass;

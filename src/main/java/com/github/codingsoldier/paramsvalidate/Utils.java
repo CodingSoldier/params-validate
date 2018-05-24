@@ -4,6 +4,9 @@ import java.math.BigDecimal;
 import java.util.Date;
 import java.util.Map;
 
+/**
+ * author chenpiqian
+ */
 public class Utils<T> extends org.springframework.util.StringUtils{
 
     //空、空格

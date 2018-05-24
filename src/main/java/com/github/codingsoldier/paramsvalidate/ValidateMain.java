@@ -13,6 +13,9 @@ import java.lang.reflect.Type;
 import java.util.*;
 import java.util.regex.Pattern;
 
+/**
+ * author chenpiqian
+ */
 @Component
 public class ValidateMain {
 

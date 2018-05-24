@@ -23,6 +23,9 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 
+/**
+ * author chenpiqian
+ */
 @Aspect
 @Component
 public class ValidateAspect {

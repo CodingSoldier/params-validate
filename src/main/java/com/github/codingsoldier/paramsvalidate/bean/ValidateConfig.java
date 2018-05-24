@@ -1,5 +1,8 @@
 package com.github.codingsoldier.paramsvalidate.bean;
 
+/**
+ * author chenpiqian
+ */
 public class ValidateConfig {
 
     private String file;

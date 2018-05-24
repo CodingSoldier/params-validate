@@ -6,6 +6,9 @@ import com.github.codingsoldier.paramsvalidate.bean.ValidateConfig;
 
 import java.util.Map;
 
+/**
+ * author chenpiqian
+ */
 public interface ValidateInterface {
     /**
      * 返回json文件基础路径。init.json文件必须放在此目录下

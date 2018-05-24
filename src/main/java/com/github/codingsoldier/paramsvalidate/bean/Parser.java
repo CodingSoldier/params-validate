@@ -1,5 +1,8 @@
 package com.github.codingsoldier.paramsvalidate.bean;
 
+/**
+ * author chenpiqian
+ */
 public class Parser {
     private Class parserClass;
     private Class featureArrClass;
