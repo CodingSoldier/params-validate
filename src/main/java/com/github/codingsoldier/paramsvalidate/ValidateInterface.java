@@ -1,5 +1,6 @@
 package com.github.codingsoldier.paramsvalidate;
 
+import com.github.codingsoldier.paramsvalidate.bean.Parser;
 import com.github.codingsoldier.paramsvalidate.bean.ResultValidate;
 import com.github.codingsoldier.paramsvalidate.bean.ValidateConfig;
 
@@ -18,6 +19,15 @@ public interface ValidateInterface {
      * @return 返回给客户端的数据
      */
     Object validateNotPass(ResultValidate resultValidate);
+
+    /**
+     * json解析器
+     * 1、使用默认解析器jackson，直接返回null即可。
+     * 2、使用gson，请返回 new Parser(Gson.class)。
+     * 3、使用fastjson，请返回new Parser(JSON.class, Feature[].class)。
+     * 为了支持fastjson，搞得好坑爹。
+     */
+    Parser getParser();
 
     /**
      * 获取缓存中的校验规则

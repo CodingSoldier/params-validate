@@ -1,15 +1,14 @@
 package com.github.codingsoldier.paramsvalidate;
 
-
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.github.codingsoldier.paramsvalidate.bean.ResultValidate;
+import com.github.codingsoldier.paramsvalidate.bean.ValidateConfig;
 import org.aspectj.lang.JoinPoint;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Pointcut;
 import org.aspectj.lang.reflect.MethodSignature;
-import com.github.codingsoldier.paramsvalidate.bean.ResultValidate;
-import com.github.codingsoldier.paramsvalidate.bean.ValidateConfig;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.web.context.request.RequestContextHolder;
@@ -39,11 +38,15 @@ public class ValidateAspect {
     @Around("aspect()")
     public Object around(JoinPoint joinPoint){
         Object obj = null;
+        ResultValidate resultValidate = new ResultValidate(true);
         try {
-            ResultValidate resultValidate = this.validateResult(joinPoint);
+            resultValidate = this.validateResult(joinPoint);
             obj = resultValidate.isPass() != false ? ((ProceedingJoinPoint) joinPoint).proceed()
                     : validateInterface.validateNotPass(resultValidate);
         }catch (Throwable e){
+            resultValidate.setPass(false);
+            resultValidate.setMsgSet(new HashSet(){{add("服务暂不可用");}});
+            obj = validateInterface.validateNotPass(resultValidate);
             e.printStackTrace();
         }
         return obj;
@@ -55,7 +58,7 @@ public class ValidateAspect {
         try {
             Method method = getCurrentMethod(joinPoint);
             ValidateConfig validateConfig = getConfigs(method);
-            if (Utils.isNotBlankObj(validateConfig.getFile())){
+            if (Utils.isNotBlank(validateConfig.getFile())){
                 Map<String, Object> allParam = mergeParams(joinPoint);
                 resultValidate = validateMain.validateHandle(validateConfig, allParam);
             }
@@ -118,7 +121,7 @@ public class ValidateAspect {
         Map<String, String[]> paramMap = request.getParameterMap();
         if (paramMap != null){
             for (String key:paramMap.keySet()){
-                if (Utils.isNotBlankObj(key)){
+                if (Utils.isNotBlank(key)){
                     value = paramMap.get(key);
                     if (value.length == 1){
                         resultMap.put(key, value[0]);
