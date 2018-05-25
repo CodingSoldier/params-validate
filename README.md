@@ -15,7 +15,12 @@
 ## 2、扫描com.github.codingsoldier.paramsvalidate目录。
   若为spring-boot项目，在启动类上加上注解，如下：  
   @ComponentScan("你自己项目的扫描路径, com.github.codingsoldier.paramsvalidate")
-## 3、编写校验文件。例如在resources目录下新建目录和文件，如下：
+## 3、开启aop。
+  3.1 spring-boot项目，请在application.properties中配置：  
+      spring.aop.proxy-target-class=true  
+  3.2 ssm项目在application-context.xml中配置：  
+      <aop:aspectj-autoproxy />
+## 4、编写校验文件。例如在resources目录下新建目录和文件，如下：
   config/validate/test.json  
   test.json文件中编写校验规则，如下：
   ```
@@ -29,7 +34,7 @@
 	  }  
   }
 ```
-### 4、实现ValidateInterface接口
+### 5、实现ValidateInterface接口
 ```java
 @Service
 public class ValidateInterfaceImpl implements ValidateInterface{
@@ -75,9 +80,9 @@ public class ValidateInterfaceImpl implements ValidateInterface{
     }
 } 
 ```
-## 5、controller方法上（注意：是方法上，比如：functionValidate()）添加注解：
+## 6、controller方法上（注意：是方法上，比如：functionValidate()）添加注解：
    @ParamsValidate(file = "test.json")
-## 6、前台ajax发送请求到functionValidate()，则ajax中的参数num必须符合校验规则：  
+## 7、前台ajax发送请求到functionValidate()，则ajax中的参数num必须符合校验规则：  
 ```
 "request": true,
 "minValue": 1,
