@@ -1,10 +1,9 @@
-# params-validate
-params-validate
+#params-validate
 基于Spring MVC的请求参数校验库
 
 注意：只能在ssm、spring-boot等使用了Spring MVC框架的项目中使用
 使用方式：
-1、pom.xml中导入jar包
+##1、pom.xml中导入jar包
 	<dependency>
 		<groupId>com.github.codingsoldier</groupId>
 		<artifactId>params-validate</artifactId>
@@ -12,13 +11,14 @@ params-validate
 		<!--最新版本请查看：
 		http://search.maven.org/#search%7Cga%7C1%7Cg%3A%22com.github.codingsoldier%22-->
 	</dependency>
-2、扫描com.github.codingsoldier.paramsvalidate目录。
+##2、扫描com.github.codingsoldier.paramsvalidate目录。
   若为spring-boot项目，在	启动类上加上下边的注解
   @ComponentScan("你自己项目的扫描路径, com.github.codingsoldier.paramsvalidate")
-3、编写校验文件，例如在resources目录下新建如下目录和文件
+##3、编写校验文件，例如在resources目录下新建如下目录和文件
   config/validate/test.json 
 
   test.json文件中写入校验规则，如下：
+  ```
   {
 	  "id": {
 	      "request": true,
@@ -28,8 +28,9 @@ params-validate
 	      "message": "id:必填、正整数"
 	  }  
   }
-
-4、实现ValidateInterface接口
+```
+###4、实现ValidateInterface接口
+```
 public class ValidateInterfaceImpl implements ValidateInterface{
 
     //返回json校验文件的基础路径
@@ -72,12 +73,13 @@ public class ValidateInterfaceImpl implements ValidateInterface{
 
     }
 } 
-
-5、controller方法上（注意：是方法上，比如：functionValidate）添加注解：
+```
+##5、controller方法上（注意：是方法上，比如：functionValidate）添加注解：
    @ParamsValidate(file = "test.json")
-6、前台ajax发送请求到functionValidate，则ajax中的参数id必须符合校验规则：  
-	"request": true,
-	"minValue": 1,
-	"maxValue": 1000000000,
-	"regex": "^\\d+$"
-
+##6、前台ajax发送请求到functionValidate，则ajax中的参数id必须符合校验规则：  
+```
+"request": true,
+"minValue": 1,
+"maxValue": 1000000000,
+"regex": "^\\d+$"
+```
