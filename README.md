@@ -1,8 +1,6 @@
 # params-validate
 基于Spring MVC的请求参数校验库
-
 **注意：只能在ssm、spring-boot等使用了Spring MVC框架的项目中使用**
-
 # 使用方式：
 
 ## 1、pom.xml中导入jar包
@@ -14,7 +12,7 @@
 		http://search.maven.org/#search%7Cga%7C1%7Cg%3A%22com.github.codingsoldier%22-->
 	</dependency>
 ## 2、扫描com.github.codingsoldier.paramsvalidate目录。
-  若为spring-boot项目，在启动类上加上如下注解	
+  若为spring-boot项目，在启动类上加上注解，如下：	
   
   @ComponentScan("你自己项目的扫描路径, com.github.codingsoldier.paramsvalidate")
 ## 3、编写校验文件。例如在resources目录下新建目录和文件，如下：
