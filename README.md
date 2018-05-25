@@ -90,7 +90,6 @@ public class ValidateInterfaceImpl implements ValidateInterface{
 本教程仅为简单使用，我写了一个测试工程  
 https://github.com/CodingSoldier/test-params-validate  
 里面有一些高级使用方式，如下：  
-
 1、在basePath()路径下添加init.json文件，init.json中写通用正则表达式，并在其他校验文件中使用init.json中的正则表达式  
 2、@ParamsValidate使用keyName，避免每个请求都写得添加一个校验文件  
 3、使用gson、fastjson作为解析器，以便以非严格模式编写json文件，如在json中写注释  4、使用缓存存储校验规则，避免每次校验都读json文件
