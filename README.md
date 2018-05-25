@@ -20,12 +20,12 @@
   test.json文件中编写校验规则，如下：
   ```
   {
-	  "id": {
+	  "num": {
 	      "request": true,
 	      "minValue": 1,
 	      "maxValue": 1000000000,
 	      "regex": "^\\d+$",
-	      "message": "id:必填、正整数"
+	      "message": "num:必填、正整数"
 	  }  
   }
 ```
@@ -77,7 +77,7 @@ public class ValidateInterfaceImpl implements ValidateInterface{
 ```
 ## 5、controller方法上（注意：是方法上，比如：functionValidate()）添加注解：
    @ParamsValidate(file = "test.json")
-## 6、前台ajax发送请求到functionValidate()，则ajax中的参数id必须符合校验规则：  
+## 6、前台ajax发送请求到functionValidate()，则ajax中的参数num必须符合校验规则：  
 ```
 "request": true,
 "minValue": 1,
