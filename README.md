@@ -14,7 +14,8 @@
 		http://search.maven.org/#search%7Cga%7C1%7Cg%3A%22com.github.codingsoldier%22-->
 	</dependency>
 ## 2、扫描com.github.codingsoldier.paramsvalidate目录。
-  若为spring-boot项目，在启动类上加上下边的注解		
+  若为spring-boot项目，在启动类上加上如下注解	
+  
   @ComponentScan("你自己项目的扫描路径, com.github.codingsoldier.paramsvalidate")
 ## 3、编写校验文件，例如在resources目录下新建如下目录和文件
   config/validate/test.json 
