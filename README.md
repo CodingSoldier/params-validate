@@ -17,10 +17,10 @@
   若为spring-boot项目，在启动类上加上如下注解	
   
   @ComponentScan("你自己项目的扫描路径, com.github.codingsoldier.paramsvalidate")
-## 3、编写校验文件，例如在resources目录下新建如下目录和文件
+## 3、编写校验文件。例如在resources目录下新建目录和文件，如下：
   config/validate/test.json 
 
-  test.json文件中写入校验规则，如下：
+  test.json文件中编写校验规则，如下：
   ```
   {
 	  "id": {
@@ -33,7 +33,8 @@
   }
 ```
 ### 4、实现ValidateInterface接口
-```
+```java
+@Service
 public class ValidateInterfaceImpl implements ValidateInterface{
 
     //返回json校验文件的基础路径
@@ -42,7 +43,7 @@ public class ValidateInterfaceImpl implements ValidateInterface{
     	return "config/validate/";    
     }
 
-    //参数校验未通过, 返回自定义数据给客户端
+    //参数未通过校验, 返回自定义数据给客户端
     @Override
     public Object validateNotPass(ResultValidate resultValidate) {
         Map<String, Object> r = new HashMap<>();
@@ -53,7 +54,7 @@ public class ValidateInterfaceImpl implements ValidateInterface{
 
     /**
      * json解析器
-     * 1、使用默认解析器jackson，直接返回null即可，使用此解析器，json文件必须以严格模式编写
+     * 1、使用默认解析器jackson，直接返回null即可，使用此解析器，json校验文件必须以严格模式编写
      * 2、使用gson，请返回 new Parser(Gson.class);
      * 3、使用fastjson，请返回new Parser(JSON.class, Feature[].class)
      * 为了支持fastjson，搞得好坑爹
@@ -77,12 +78,28 @@ public class ValidateInterfaceImpl implements ValidateInterface{
     }
 } 
 ```
-## 5、controller方法上（注意：是方法上，比如：functionValidate）添加注解：
+## 5、controller方法上（注意：是方法上，比如：functionValidate()）添加注解：
    @ParamsValidate(file = "test.json")
-## 6、前台ajax发送请求到functionValidate，则ajax中的参数id必须符合校验规则：  
+## 6、前台ajax发送请求到functionValidate()，则ajax中的参数id必须符合校验规则：  
 ```
 "request": true,
 "minValue": 1,
 "maxValue": 1000000000,
 "regex": "^\\d+$"
 ```
+
+
+
+本教程仅为简单使用，我写了一个测试工程
+
+https://github.com/CodingSoldier/test-params-validate
+
+里面有一些高级使用方式，如下：
+
+1、在basePath()路径下添加init.json文件，init.json中写通用正则表达式，并在其他校验文件中使用init.json中的正则表达式
+
+2、@ParamsValidate使用keyName，避免每个请求都写得添加一个校验文件
+
+3、使用gson、fastjson作为解析器，以便以非严格模式编写json文件，如在json中写注释
+
+4、使用缓存存储校验规则，避免每次校验都读json文件
