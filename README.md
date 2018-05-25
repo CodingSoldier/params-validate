@@ -1,8 +1,7 @@
 # params-validate
 基于Spring MVC的请求参数校验库
-<font color='red'>内容</font> 
-<font color=red>内容</font> 
-注意：只能在ssm、spring-boot等使用了Spring MVC框架的项目中使用
+
+**注意：只能在ssm、spring-boot等使用了Spring MVC框架的项目中使用**
 
 # 使用方式：
 
@@ -15,7 +14,7 @@
 		http://search.maven.org/#search%7Cga%7C1%7Cg%3A%22com.github.codingsoldier%22-->
 	</dependency>
 ## 2、扫描com.github.codingsoldier.paramsvalidate目录。
-  若为spring-boot项目，在	启动类上加上下边的注解
+  若为spring-boot项目，在启动类上加上下边的注解		
   @ComponentScan("你自己项目的扫描路径, com.github.codingsoldier.paramsvalidate")
 ## 3、编写校验文件，例如在resources目录下新建如下目录和文件
   config/validate/test.json 
