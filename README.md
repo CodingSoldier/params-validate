@@ -1,6 +1,7 @@
 # params-validate
 基于Spring MVC的请求参数校验库
-
+<font color='red'>内容</font> 
+<font color=red>内容</font> 
 注意：只能在ssm、spring-boot等使用了Spring MVC框架的项目中使用
 
 # 使用方式：
