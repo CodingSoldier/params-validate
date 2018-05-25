@@ -23,9 +23,6 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 
-/**
- * author chenpiqian
- */
 @Aspect
 @Component
 public class ValidateAspect {
@@ -86,7 +83,8 @@ public class ValidateAspect {
     private ValidateConfig getConfigs(Method method){
         ValidateConfig validateConfig = new ValidateConfig();
         if (method.getAnnotation(ParamsValidate.class) != null){
-            String file = method.getAnnotation(ParamsValidate.class).file();
+            String file = method.getAnnotation(ParamsValidate.class).value();
+            file = Utils.isNotBlank(file) ? file : method.getAnnotation(ParamsValidate.class).file();
             String keyName = method.getAnnotation(ParamsValidate.class).keyName();
             validateConfig.setFile(file);
             validateConfig.setKeyName(keyName);
