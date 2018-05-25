@@ -1,9 +1,9 @@
 # params-validate
 基于Spring MVC的请求参数校验库
 
-<div style="color:red">注意：只能在ssm、spring-boot等使用了Spring MVC框架的项目中使用</div>
+注意：只能在ssm、spring-boot等使用了Spring MVC框架的项目中使用
 
-使用方式：
+# 使用方式：
 
 ## 1、pom.xml中导入jar包
 	<dependency>
