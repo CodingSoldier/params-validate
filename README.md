@@ -14,13 +14,13 @@
 	</dependency>
 ## 2、扫描com.github.codingsoldier.paramsvalidate目录。
   2.1 spring-boot项目，在启动类上加上注解，如下：  
-  @ComponentScan("你自己项目的扫描路径, com.github.codingsoldier.paramsvalidate")
-  2.2 ssm项目在spring的xml配置中加于：
+  @ComponentScan("你自己项目的扫描路径, com.github.codingsoldier.paramsvalidate")  
+  2.2 ssm项目在spring的xml配置中加于：  
   <context:component-scan base-package="你自己项目的扫描路径, com.github.codingsoldier.paramsvalidate"/>
 ## 3、开启aop。
-  3.1 spring-boot项目，请在application.properties中配置：  
-      spring.aop.proxy-target-class=true  
-  3.2 ssm项目在Spring MVC的xml配置加入（注意，在spring的xml中加无效，一定要在Spring MVC的xml中加）：  
+  3.1 spring-boot项目，请在application.properties中配置：    
+      spring.aop.proxy-target-class=true    
+  3.2 ssm项目在Spring MVC的xml配置加入（注意，在spring的xml中加无效，一定要在Spring MVC的xml中加）：    
       <aop:aspectj-autoproxy proxy-target-class="true" />
 ## 4、编写校验文件。例如在resources目录下新建目录和文件，如下：
   config/validate/test.json  
