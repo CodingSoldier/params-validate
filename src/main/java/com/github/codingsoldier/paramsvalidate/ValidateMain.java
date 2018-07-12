@@ -19,7 +19,7 @@ import java.util.regex.Pattern;
 @Component
 public class ValidateMain {
 
-    private static Map<String, String> regexCommon = null;
+    private static volatile Map<String, String> regexCommon = null;
 
     public static final String REQUEST = "request";
     public static final String MIN_VALUE = "minValue";
@@ -281,12 +281,15 @@ public class ValidateMain {
         if (regexCommon != null)
             return regexCommon;
 
-        ObjectMapper mapper = new ObjectMapper();
-        String basePath = validateInterface.basePath();
-        String filePath = Utils.trimBeginEndChar(basePath, '/') + "/"+ REGEX_COMMON_JSON;
-        try (InputStream is = this.getClass().getClassLoader().getResourceAsStream(filePath)){
-            regexCommon = is != null ? mapper.readValue(is, Map.class) : new HashMap<>();
+        synchronized (this){
+            ObjectMapper mapper = new ObjectMapper();
+            String basePath = validateInterface.basePath();
+            String filePath = Utils.trimBeginEndChar(basePath, '/') + "/"+ REGEX_COMMON_JSON;
+            try (InputStream is = this.getClass().getClassLoader().getResourceAsStream(filePath)){
+                regexCommon = is != null ? mapper.readValue(is, Map.class) : new HashMap<>();
+            }
         }
+
         return regexCommon;
     }
 
