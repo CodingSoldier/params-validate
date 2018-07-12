@@ -84,6 +84,10 @@ public class Utils<T> extends org.springframework.util.StringUtils{
     public static String trimBeginChar(String args, char beTrim) {
         return trimBeginEndCharBase(args, beTrim, true, false);
     }
+    //删除字符串末尾指定字符
+    public static String trimEndChar(String args, char enTrim) {
+        return trimBeginEndCharBase(args, enTrim, false, true);
+    }
 
     //是否非bean，list，map
     public static boolean isSingleType (Object obj) {
