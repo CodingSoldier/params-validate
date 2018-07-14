@@ -1,10 +1,32 @@
 package com.github.codingsoldier.paramsvalidate;
 
+import org.springframework.web.context.request.RequestContextHolder;
+import org.springframework.web.context.request.ServletRequestAttributes;
+
+import javax.servlet.http.HttpServletRequest;
 import java.math.BigDecimal;
 import java.util.Date;
 import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
-public class Utils<T> extends org.springframework.util.StringUtils{
+/**
+ * author chenpiqian 2018-05-25
+ */
+public class ValidateUtils<T> extends org.springframework.util.StringUtils{
+
+    private static final Logger LOGGER = Logger.getLogger("@ParamsValidate ERROR ");
+
+    public static void log(String msg, Throwable e){
+        HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder.getRequestAttributes()).getRequest();
+        msg = isBlank(msg) ? e.getMessage() : msg;
+        msg = "URI: "+request.getRequestURI()+". Exception Message: "+msg;
+        LOGGER.log(Level.SEVERE, msg, e);
+    }
+
+    public static void log(Throwable e){
+        log("", e);
+    }
 
     //空、空格
     public static boolean isBlank(String str1) {
@@ -56,7 +78,7 @@ public class Utils<T> extends org.springframework.util.StringUtils{
 
     //删除字符串两端指定字符
     private static String trimBeginEndCharBase(String args, char beTrim, boolean b, boolean e) {
-        if (Utils.isEmpty(args) || Utils.isEmpty(beTrim)){
+        if (isEmpty(args) || isEmpty(beTrim)){
             return "";
         }
         int st = 0;
@@ -84,21 +106,17 @@ public class Utils<T> extends org.springframework.util.StringUtils{
     public static String trimBeginChar(String args, char beTrim) {
         return trimBeginEndCharBase(args, beTrim, true, false);
     }
-    //删除字符串末尾指定字符
-    public static String trimEndChar(String args, char enTrim) {
-        return trimBeginEndCharBase(args, enTrim, false, true);
-    }
 
     //是否非bean，list，map
     public static boolean isSingleType (Object obj) {
         return obj == null || obj instanceof Number
-                || obj instanceof CharSequence || obj instanceof Character
-                || obj instanceof Date;
+            || obj instanceof CharSequence || obj instanceof Character
+            || obj instanceof Date;
     }
 
     //校验规则，是否必填
     public static boolean isRequest(Map<String, Object> rule){
-        return Boolean.parseBoolean(Utils.objToStr(rule.get(ValidateMain.REQUEST)));
+        return Boolean.parseBoolean(objToStr(rule.get(ValidateMain.REQUEST)));
     }
 
     //字符串转数字，数字转double
@@ -110,6 +128,4 @@ public class Utils<T> extends org.springframework.util.StringUtils{
     public static BigDecimal getBigDecimal(Object value){
         return new BigDecimal(getDouble(value));
     }
-
-
 }

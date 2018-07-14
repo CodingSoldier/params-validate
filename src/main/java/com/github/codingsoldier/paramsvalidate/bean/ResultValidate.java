@@ -11,6 +11,8 @@ public class ResultValidate {
 
     private Set<String> msgSet;
 
+    private Throwable throwable;
+
     public ResultValidate() {
     }
 
@@ -32,5 +34,13 @@ public class ResultValidate {
 
     public void setMsgSet(Set<String> msgSet) {
         this.msgSet = msgSet;
+    }
+
+    public Throwable getThrowable() {
+        return throwable;
+    }
+
+    public void setThrowable(Throwable throwable) {
+        this.throwable = throwable;
     }
 }
