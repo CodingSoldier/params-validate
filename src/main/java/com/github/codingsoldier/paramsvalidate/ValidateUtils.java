@@ -16,7 +16,7 @@ public class ValidateUtils<T> extends org.springframework.util.StringUtils{
 
     public static void log(String msg, Method method, Throwable e){
         if (method != null){
-            msg = String.format("ERROR METHOD %s.%s  Exception Message: %s",method.getDeclaringClass().getName(),method.getName(),msg);
+            msg = String.format("ERROR METHOD: %s.%s  Exception Message: %s",method.getDeclaringClass().getName(),method.getName(),msg);
         }else {
             msg = String.format("Exception Message: %s",msg);
         }
