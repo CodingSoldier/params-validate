@@ -6,14 +6,15 @@ package com.github.codingsoldier.paramsvalidate.bean;
 public class ValidateConfig {
 
     private String file;
-    private String keyName;
+    private String key;
+    private String level;
 
     public ValidateConfig() {
     }
 
-    public ValidateConfig(String file, String keyName) {
+    public ValidateConfig(String file, String key) {
         this.file = file;
-        this.keyName = keyName;
+        this.key = key;
     }
 
     public String getFile() {
@@ -24,11 +25,19 @@ public class ValidateConfig {
         this.file = file;
     }
 
-    public String getKeyName() {
-        return keyName;
+    public String getKey() {
+        return key;
     }
 
-    public void setKeyName(String keyName) {
-        this.keyName = keyName;
+    public void setKey(String key) {
+        this.key = key;
+    }
+
+    public String getLevel() {
+        return level;
+    }
+
+    public void setLevel(String level) {
+        this.level = level;
     }
 }

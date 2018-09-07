@@ -1,6 +1,5 @@
 package com.github.codingsoldier.paramsvalidate;
 
-
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -16,5 +15,6 @@ import java.lang.annotation.Target;
 public @interface ParamsValidate {
     String value() default "";
     String file() default "";
-    String keyName() default "";
+    String key() default "";
+    String level() default "";
 }

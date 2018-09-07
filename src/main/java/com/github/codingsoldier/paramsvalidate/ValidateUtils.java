@@ -2,7 +2,7 @@ package com.github.codingsoldier.paramsvalidate;
 
 import java.lang.reflect.Method;
 import java.math.BigDecimal;
-import java.util.Date;
+import java.util.Collection;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -14,21 +14,24 @@ public class ValidateUtils<T> extends org.springframework.util.StringUtils{
 
     private static final Logger LOGGER = Logger.getLogger("@ParamsValidate");
 
-    public static void log(String msg, Method method, Throwable e){
+    public static void logWarning(String msg){
+        LOGGER.log(Level.WARNING, msg);
+    }
+    public static void logWarning(String msg, Method method, Throwable e){
+        log(Level.WARNING, msg, method, e);
+    }
+
+    public static void logSevere(String msg, Method method, Throwable e){
+        log(Level.SEVERE, msg, method, e);
+    }
+
+    public static void log(Level level, String msg, Method method, Throwable e){
         if (method != null){
-            msg = String.format("ERROR METHOD: %s.%s  Exception Message: %s",method.getDeclaringClass().getName(),method.getName(),msg);
+            msg = String.format("Error Method: %s.%s  Exception Message: %s",method.getDeclaringClass().getName(),method.getName(),msg);
         }else {
             msg = String.format("Exception Message: %s",msg);
         }
-        LOGGER.log(Level.SEVERE, msg, e);
-    }
-
-    public static void log(Method method, Throwable e){
-        log(e.getMessage(), method, e);
-    }
-
-    public static void log(Throwable e){
-        log(null, e);
+        LOGGER.log(level, msg, e);
     }
 
     //空、空格
@@ -49,21 +52,6 @@ public class ValidateUtils<T> extends org.springframework.util.StringUtils{
     //非空、非""
     public static boolean isNotBlankObj(Object obj) {
         return !isBlankObj(obj);
-    }
-
-    //字符相等
-    public static boolean strEquals(String str1, String str2) {
-        return str1 != null && str2 != null && str1.equals(str2);
-    }
-
-    //字符非blank且相等
-    public static boolean strNotBlankEquals(String str1, String str2) {
-        return str1 != null && !"".equals(str1) && str2 != null && !"".equals(str2) && str1.equals(str2);
-    }
-
-    //字符相等忽略大小写
-    public static boolean strEqualsIgnoreCase(String str1, String str2) {
-        return str1 != null && str2 != null && str1.equalsIgnoreCase(str2);
     }
 
     //对象转字符串
@@ -110,18 +98,6 @@ public class ValidateUtils<T> extends org.springframework.util.StringUtils{
         return trimBeginEndCharBase(args, beTrim, true, false);
     }
 
-    //是否非bean，list，map
-    public static boolean isSingleType (Object obj) {
-        return obj == null || obj instanceof Number
-            || obj instanceof CharSequence || obj instanceof Character
-            || obj instanceof Date;
-    }
-
-    //校验规则，是否必填
-    public static boolean isRequest(Map<String, Object> rule){
-        return Boolean.parseBoolean(objToStr(rule.get(ValidateMain.REQUEST)));
-    }
-
     //字符串转数字，数字转double
     public static double getDouble(Object value){
         return value instanceof String ? Double.parseDouble(objToStr(value)) : ((Number)value).doubleValue();
@@ -131,4 +107,28 @@ public class ValidateUtils<T> extends org.springframework.util.StringUtils{
     public static BigDecimal getBigDecimal(Object value){
         return new BigDecimal(getDouble(value));
     }
+
+    //校验规则，request是否为true
+    public static boolean isRequestTrue(Map<String, Object> rules){
+        return Boolean.parseBoolean(objToStr(rules.get(ValidateMain.REQUEST)));
+    }
+
+    //校验规则，request是否为false
+    public static boolean isRequestFalse(Map<String, Object> rules){
+        return "false".equals(objToStr(rules.get(ValidateMain.REQUEST)).toLowerCase());
+    }
+
+    //是否为null、""、空集合
+    public static boolean isNullEmptyCollection(Object obj) {
+        boolean r = false;
+        if (isBlankObj(obj)){
+            r = true;
+        }else if (obj instanceof Collection){
+            r = ((Collection)obj).size() == 0;
+        }else if (obj instanceof Map){
+            r = ((Map)obj).size() == 0;
+        }
+        return r;
+    }
+
 }

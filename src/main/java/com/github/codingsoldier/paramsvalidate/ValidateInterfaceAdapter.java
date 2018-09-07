@@ -11,9 +11,23 @@ import java.util.Map;
  */
 public abstract class ValidateInterfaceAdapter implements ValidateInterface{
 
+    @Override
+    public String basePath() {
+        return "validate/";
+    }
+
+    @Override
     public Parser getParser() {
         return null;
     }
+
+    @Override
+    public String getLevel(){
+        return PvLevel.LOOSE;
+    }
+
+    //必须覆盖此方法
+    //public Object validateNotPass(ResultValidate resultValidate)
 
     @Override
     public Map<String, Object> getCache(ValidateConfig validateConfig) {
