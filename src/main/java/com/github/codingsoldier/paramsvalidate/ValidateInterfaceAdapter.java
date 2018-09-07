@@ -1,5 +1,6 @@
 package com.github.codingsoldier.paramsvalidate;
 
+
 import com.github.codingsoldier.paramsvalidate.bean.Parser;
 import com.github.codingsoldier.paramsvalidate.bean.ValidateConfig;
 
