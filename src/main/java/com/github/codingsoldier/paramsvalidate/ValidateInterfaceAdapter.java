@@ -2,6 +2,7 @@ package com.github.codingsoldier.paramsvalidate;
 
 
 import com.github.codingsoldier.paramsvalidate.bean.Parser;
+import com.github.codingsoldier.paramsvalidate.bean.ResultValidate;
 import com.github.codingsoldier.paramsvalidate.bean.ValidateConfig;
 
 import java.util.HashMap;
@@ -24,11 +25,11 @@ public abstract class ValidateInterfaceAdapter implements ValidateInterface{
 
     @Override
     public String getLevel(){
-        return PvLevel.LOOSE;
+        return PvLevel.STRICT;
     }
 
     //必须覆盖此方法
-    //public Object validateNotPass(ResultValidate resultValidate)
+    public abstract Object validateNotPass(ResultValidate resultValidate);
 
     @Override
     public Map<String, Object> getCache(ValidateConfig validateConfig) {
