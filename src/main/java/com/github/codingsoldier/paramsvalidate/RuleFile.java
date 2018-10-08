@@ -9,7 +9,9 @@ import org.springframework.stereotype.Component;
 import java.io.*;
 import java.lang.reflect.Method;
 import java.lang.reflect.Type;
+import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 
 @Component
 public class RuleFile {
@@ -22,7 +24,7 @@ public class RuleFile {
     private ValidateInterface validateInterface;
 
     //获取需要校验的json
-    public Map<String, Object> ruleFileJsonToMap(ValidateConfig validateConfig) throws Exception{
+    public Map<String, Object> ruleFileJsonToMap(ValidateConfig validateConfig, Set<String> paramKeySet) throws Exception{
         String basePath = validateInterface.basePath();
         String filePath = ValidateUtils.trimBeginEndChar(basePath, '/') + "/"
             + ValidateUtils.trimBeginChar(validateConfig.getFile(), '/');
@@ -35,12 +37,17 @@ public class RuleFile {
 
             String key = validateConfig.getKey();
             if (ValidateUtils.isNotBlank(key)){
-                json = (Map<String, Object>)json.get(key);
-                if (json != null){
-                    validateInterface.setCache(validateConfig, json);
-                }else{
+                Map<String, Object> jsonValue = (Map<String, Object>)json.get(key);
+                if (jsonValue == null)
                     throw new ParamsValidateException(String.format("%s文件中无key: %s", filePath, key));
+
+                if (paramKeySet.contains(key)){
+                    json = new HashMap<>();
+                    json.put(key, jsonValue);
+                }else {
+                    json = jsonValue;
                 }
+                validateInterface.setCache(validateConfig, json);
             }
         }
         return json;
@@ -82,25 +89,25 @@ public class RuleFile {
 
     //读取init.json文件到regexCommon
     public Map<String, String> getRegexCommon(){
-        if (regexCommon != null)
-            return regexCommon;
+        if (regexCommon == null){
+            synchronized (this){
+                if (regexCommon == null){
+                    ObjectMapper mapper = new ObjectMapper();
+                    String basePath = validateInterface.basePath();
+                    String filePath = ValidateUtils.trimBeginEndChar(basePath, '/') + "/"+ REGEX_COMMON_JSON;
+                    try (InputStream is = this.getClass().getClassLoader().getResourceAsStream(filePath)){
+                        if (is == null)
+                            throw new ParamsValidateException(String.format("读取%s，结果为null", filePath));
 
-        synchronized (this){
-            ObjectMapper mapper = new ObjectMapper();
-            String basePath = validateInterface.basePath();
-            String filePath = ValidateUtils.trimBeginEndChar(basePath, '/') + "/"+ REGEX_COMMON_JSON;
-            try (InputStream is = this.getClass().getClassLoader().getResourceAsStream(filePath)){
-                if (is == null)
-                    throw new ParamsValidateException(String.format("读取%s，结果为null", filePath));
-
-                regexCommon = mapper.readValue(is, Map.class);
-            }catch (IOException ioe){
-                ParamsValidateException pve = new ParamsValidateException(String.format("读取、解析%s异常，%s", filePath, ioe.getMessage()));
-                pve.initCause(ioe);
-                throw pve;
+                        regexCommon = mapper.readValue(is, Map.class);
+                    }catch (IOException ioe){
+                        ParamsValidateException pve = new ParamsValidateException(String.format("读取、解析%s异常，%s", filePath, ioe.getMessage()));
+                        pve.initCause(ioe);
+                        throw pve;
+                    }
+                }
             }
         }
-
         return regexCommon;
     }
 

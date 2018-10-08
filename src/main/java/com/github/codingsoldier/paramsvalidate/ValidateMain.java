@@ -24,15 +24,16 @@ public class ValidateMain {
     public static final String MAX_LENGTH = "maxLength";
     public static final String REGEX = "regex";
     public static final String MESSAGE = "message";
-    public static final Set<String> ruleKeySet = new HashSet<String>(){{
-        add(REQUEST);
-        add(MIN_VALUE);
-        add(MAX_VALUE);
-        add(MIN_LENGTH);
-        add(MAX_LENGTH);
-        add(REGEX);
-        add(MESSAGE);
-    }};
+    private static Set<String> ruleKeySet = new HashSet<>();
+    static {
+        ruleKeySet.add(REQUEST);
+        ruleKeySet.add(MIN_VALUE);
+        ruleKeySet.add(MAX_VALUE);
+        ruleKeySet.add(MIN_LENGTH);
+        ruleKeySet.add(MAX_LENGTH);
+        ruleKeySet.add(REGEX);
+        ruleKeySet.add(MESSAGE);
+    }
 
     private ThreadLocal<List<String>> msgThreadLocal = new ThreadLocal<>();  //错误提示信息
     private ThreadLocal<String> ruleKeyThreadLocal = new ThreadLocal<>();  //规则的key
@@ -41,6 +42,8 @@ public class ValidateMain {
     private RequestParam requestParam;
     @Autowired
     private RuleFile ruleFile;
+
+
 
     //校验
     public ResultValidate validateExecute(JoinPoint joinPoint, ValidateConfig validateConfig) throws Exception{
@@ -51,7 +54,7 @@ public class ValidateMain {
             //获取请求参数
             Map<String, Object> allParam = requestParam.mergeParams(joinPoint);
             //获取校验规则
-            Map<String, Object> json = ruleFile.ruleFileJsonToMap(validateConfig);
+            Map<String, Object> json = ruleFile.ruleFileJsonToMap(validateConfig, allParam.keySet());
             //执行校验
             validateJsonParam(json, allParam);
             if (msgThreadLocal.get().size() > 0){
@@ -63,22 +66,10 @@ public class ValidateMain {
         return resultValidate;
     }
 
-    //校验规则key-value 与 请求参数key-value
+    //校验规则与请求参数
     private void validateJsonParam(Map<String, Object> json, Map<String, Object> paramMap){
         if (json == null || json.size() == 0)
             return ;
-
-        if (ruleKeySet.containsAll(json.keySet())){   //只校验一个参数，并且指定key的情况
-            if (ValidateUtils.isNullEmptyCollection(paramMap)){  //参数为空
-                checkParamValueNull(json);
-            }else {
-                for (Object key:paramMap.keySet()){
-                    checkRuleValue(json, paramMap.get(key));
-                    break;
-                }
-            }
-            return;
-        }
 
         if (ValidateUtils.isNullEmptyCollection(paramMap)){  //参数为空
             checkParamValueNull(json);
@@ -86,14 +77,14 @@ public class ValidateMain {
         }
 
         //循环校验json
-        for (String key:json.keySet()){
-            Object jsonVal = json.get(key);
-            if (!(jsonVal instanceof Map))  //对象有request的情况
+        for (Map.Entry<String, Object> entry:json.entrySet()){
+            Object jsonVal = entry.getValue();
+            if (!(jsonVal instanceof Map))  //对象校验有request
                 continue;
 
             Map<String, Object> jsonValue = (Map<String, Object>)jsonVal;
-            Object paramValue = paramMap.get(key);
-            ruleKeyThreadLocal.set(key);
+            Object paramValue = paramMap.get(entry.getKey());
+            ruleKeyThreadLocal.set(entry.getKey());
             if (ruleKeySet.containsAll(jsonValue.keySet())){   //jsonValue为校验规则rules
                 checkRuleValue(jsonValue, paramValue);
             }else{
@@ -191,18 +182,36 @@ public class ValidateMain {
 
     //处理message为空的情况
     private String createFailMsg(Map<String, Object> jsonRule){
-        String message = ruleKeyThreadLocal.get() + ValidateUtils.objToStr(jsonRule.get(MESSAGE));
+        String message = ValidateUtils.objToStr(jsonRule.get(MESSAGE));
         if (ValidateUtils.isBlank(message)){
-            String val = "";
-            message = ruleKeyThreadLocal.get() + "未通过校验，校验规则：";
-            for (String key:jsonRule.keySet()){
-                val = ValidateUtils.objToStr(jsonRule.get(key));
-                if (ValidateUtils.isNotBlank(val)){
-                    val = val.startsWith(REGEX_BEGIN) ? ruleFile.getRegexCommon().get(val) : val;
-                    message += key + "：" + val + "; ";
+            message = ValidateUtils.objToStr(ruleKeyThreadLocal.get());
+            for (Map.Entry<String, Object> entry:jsonRule.entrySet()){
+                String key = entry.getKey();
+                Object value = entry.getValue();
+                switch (key){
+                    case REQUEST:
+                        message = Boolean.TRUE.equals(value) ? (message+"必填，") : message;
+                        break;
+                    case MIN_VALUE:
+                        message = ValidateUtils.isNotBlankObj(value) ? (message+"最小值："+value+"，") : message;
+                        break;
+                    case MAX_VALUE:
+                        message = ValidateUtils.isNotBlankObj(value) ? (message+"最大值："+value+"，") : message;
+                        break;
+                    case MIN_LENGTH:
+                        message = ValidateUtils.isNotBlankObj(value) ? (message+"最小长度："+value+"，") : message;
+                        break;
+                    case MAX_LENGTH:
+                        message = ValidateUtils.isNotBlankObj(value) ? (message+"最大长度："+value+"，") : message;
+                        break;
+                    case REGEX:
+                        message = ValidateUtils.isNotBlankObj(value) ? (message+"正则规则："+value+"，") : message;
+                        break;
+                    default:
+                        break;
                 }
             }
-            message = message.substring(0, message.length()-1);
+            message = message.replaceAll("^[，]+|[，]+$", "");
         }
         return message;
     }
