@@ -1,4 +1,4 @@
-package com.github.codingsoldier.paramsvalidate;
+package com.github.codingsoldier.paramsvalidate.bean;
 
 public class PvLevel {
 

@@ -1,5 +1,6 @@
 package com.github.codingsoldier.paramsvalidate;
 
+import com.github.codingsoldier.paramsvalidate.bean.PvLevel;
 import com.github.codingsoldier.paramsvalidate.bean.ResultValidate;
 import com.github.codingsoldier.paramsvalidate.bean.ValidateConfig;
 import org.aspectj.lang.JoinPoint;
