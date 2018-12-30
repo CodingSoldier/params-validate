@@ -5,6 +5,7 @@ import com.github.codingsoldier.paramsvalidate.bean.PvMsg;
 import java.lang.reflect.Method;
 import java.math.BigDecimal;
 import java.util.Collection;
+import java.util.Iterator;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -19,14 +20,13 @@ public class ValidateUtils<T> extends org.springframework.util.StringUtils{
     public static void logWarning(String msg){
         LOGGER.log(Level.WARNING, msg);
     }
+    public static void logSevere(String msg, Throwable e){
+        LOGGER.log(Level.SEVERE, msg, e);
+    }
+
     public static void logWarning(String msg, Method method, Throwable e){
         log(Level.WARNING, msg, method, e);
     }
-
-    public static void logSevere(String msg, Method method, Throwable e){
-        log(Level.SEVERE, msg, method, e);
-    }
-
     public static void log(Level level, String msg, Method method, Throwable e){
         if (method != null){
             msg = String.format("Error Method: %s.%s%nException Message: %s",method.getDeclaringClass().getName(),method.getName(),msg);
@@ -107,10 +107,10 @@ public class ValidateUtils<T> extends org.springframework.util.StringUtils{
 
     //字符串转数字，数字转double
     public static BigDecimal getBigDecimal(Object value){
-        return BigDecimal.valueOf(getDouble(value));
+        return new BigDecimal(objToStr(value));
     }
 
-    //校验规则，request是否为true
+    //rule中包含request:true
     public static boolean isRequestTrue(Map<String, Object> rules){
         return Boolean.parseBoolean(objToStr(rules.get(PvMsg.REQUEST)));
     }
@@ -120,8 +120,42 @@ public class ValidateUtils<T> extends org.springframework.util.StringUtils{
         return "false".equals(objToStr(rules.get(PvMsg.REQUEST)).toLowerCase());
     }
 
+    //obj、map中的value、list中的元素，全都是empty
+    public static boolean isDepthEmptyValue(Object obj){
+        boolean isEmpty = true;
+        if (obj instanceof Map){
+            Map map = (Map)obj;
+            if (map.size() >0){
+                Iterator<Map.Entry<String, Object>> iterator = map.entrySet().iterator();
+                while (iterator.hasNext()){
+                    Map.Entry<String, Object> entry = iterator.next();
+                    Object value = entry.getValue();
+                    isEmpty = isDepthEmptyValue(value);
+                    if (!isEmpty){
+                        break;
+                    }
+                }
+            }
+        }else if (obj instanceof Collection){
+            Collection collection = (Collection)obj;
+            if (collection.size() > 0){
+                Iterator it = collection.iterator();
+                while (it.hasNext()){
+                    Object value = it.next();
+                    isEmpty = isDepthEmptyValue(value);
+                    if (!isEmpty){
+                        break;
+                    }
+                }
+            }
+        }else{
+            isEmpty = isBlankObj(obj);
+        }
+        return isEmpty;
+    }
+
     //是否为null、""、空集合
-    public static boolean isNullEmptyCollection(Object obj) {
+    public static boolean isEmptySize0(Object obj) {
         boolean r = false;
         if (isBlankObj(obj)){
             r = true;
@@ -131,6 +165,47 @@ public class ValidateUtils<T> extends org.springframework.util.StringUtils{
             r = ((Map)obj).size() == 0;
         }
         return r;
+    }
+
+    //Collection有空元素
+    public static boolean collectionSize0HasEmpty(Collection collection) {
+        return collection.size()==0 || collection.contains("") || collection.contains(null);
+    }
+
+    //删除map中value为空的entry
+    public static void deleteMapEmptyValue(Map<String, Object> map){
+        Iterator<Map.Entry<String, Object>> iterator = map.entrySet().iterator();
+        while (iterator.hasNext()){
+            boolean hasEmpty = false;
+            Map.Entry<String, Object> entry = iterator.next();
+            Object value = entry.getValue();
+            if (value instanceof Map){
+                deleteMapEmptyValue((Map<String, Object>)value);
+            }else if (value instanceof Collection){
+                loopList((Collection)value);
+            }else {
+                hasEmpty = isEmpty(objToStr(value)) ? true : false;
+            }
+            if (hasEmpty) {
+                iterator.remove();
+            }
+        }
+    }
+
+    /**
+     * 删除Collection中的Empty元素
+     * ["123",""] --> ["123"]
+     */
+    public static void loopList(Collection collection){
+        Iterator it = collection.iterator();
+        while (it.hasNext()){
+            Object value = it.next();
+            if (value instanceof Map){
+                deleteMapEmptyValue((Map<String, Object>)value);
+            }else if (value instanceof Collection){
+                loopList((Collection)value);
+            }
+        }
     }
 
 }

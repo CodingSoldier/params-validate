@@ -7,6 +7,7 @@ import org.aspectj.lang.JoinPoint;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.math.BigDecimal;
 import java.util.*;
 import java.util.regex.Pattern;
 
@@ -37,8 +38,6 @@ public class ValidateMain {
     @Autowired
     private RuleFile ruleFile;
 
-
-
     //校验
     public ResultValidate validateExecute(JoinPoint joinPoint, ValidateConfig validateConfig) throws Exception{
         ResultValidate resultValidate = new ResultValidate(true);  //默认是校验通过
@@ -59,13 +58,17 @@ public class ValidateMain {
         return resultValidate;
     }
 
-    //校验规则与请求参数
+    /**
+     * 校验规则与请求参数
+     * @param json
+     * @param paramMap 不可以为null
+     */
     private void validateJsonParam(Map<String, Object> json, Map<String, Object> paramMap){
-        if (json == null || json.size() == 0)
+        if (json == null || json.size() == 0)  //没有校验规则，退出
             return ;
 
-        if (ValidateUtils.isNullEmptyCollection(paramMap)){  //参数为空
-            checkParamValueNull(json);
+        if (ValidateUtils.isDepthEmptyValue(paramMap)){  //深度遍历，map中的value都是empty
+            checkParamValueEmpty(json);
             return;
         }
 
@@ -79,10 +82,10 @@ public class ValidateMain {
             Object paramValue = paramMap.get(key);
             ruleKeyThreadLocal.set(key);
             if (ruleKeySet.containsAll(jsonValue.keySet())){   //jsonValue为校验规则rules
-                checkRuleValue(jsonValue, paramValue);
+                checkRuleParamValue(jsonValue, paramValue);
             }else{
-                if (ValidateUtils.isNullEmptyCollection(paramValue)){  //参数为空
-                    checkParamValueNull(jsonValue);
+                if (ValidateUtils.isEmptySize0(paramValue)){  //参数为空
+                    checkParamValueEmpty(jsonValue);
                 }else if (paramValue instanceof Map){  //paramValue是一个key-value
                     validateJsonParam(jsonValue, (Map<String, Object>)paramValue);
                 }else if (paramValue instanceof List){  //paramValue是一个List
@@ -101,36 +104,36 @@ public class ValidateMain {
 
     }
 
-    //请求参数是空，校验规则rule有request
-    private void checkParamValueNull(Map<String, Object> json){
+    //请求参数是empty
+    private void checkParamValueEmpty(Map<String, Object> json){
         Set<String> jsonKeySet = json.keySet();
-        if (ruleKeySet.containsAll(jsonKeySet)){
+        if (ruleKeySet.containsAll(jsonKeySet)){  
             if (ValidateUtils.isRequestTrue(json)){
                 msgThreadLocal.get().add(createFailMsg(json));
             }
-        }else if (!ValidateUtils.isRequestFalse(json)){  //对象校验，对象的校验规则未填写request:false，继续校验
+        }else if (!ValidateUtils.isRequestFalse(json)){  //外层对象校验规则未填写request:false
             for (String key:jsonKeySet){
                 if (json.get(key) instanceof Map){
                     ruleKeyThreadLocal.set(key);
-                    checkParamValueNull((Map<String, Object>) json.get(key));
+                    checkParamValueEmpty((Map<String, Object>) json.get(key)); //继续校验对象中的属性值是否必填
                 }
             }
         }
     }
 
     //rules为校验规则，value为请求值（不包含键）
-    private void checkRuleValue(Map<String, Object> rules, Object value){
-        if (ValidateUtils.isRequestTrue(rules) && ValidateUtils.isBlankObj(value)){
-            //必填&&无值
+    private void checkRuleParamValue(Map<String, Object> rules, Object value){
+        if (ValidateUtils.isRequestTrue(rules)  //必填&&无值
+                && (ValidateUtils.isBlankObj(value) || (value instanceof List && ValidateUtils.collectionSize0HasEmpty((List)value)))){
             msgThreadLocal.get().add(createFailMsg(rules));
-        }else if (ValidateUtils.isNotBlankObj(value)){
-            //非必填，有值，有校验规则
-            if (value instanceof List){  //请求参数：List<基本类型>
-                List list = (List)value;
-                for (Object elem:list){
-                    if (ValidateUtils.isNotBlankObj(elem)){
-                        checkRuleValueDetail(rules, elem);
-                    }
+        }else if (ValidateUtils.isNotBlankObj(value)){  //有值&&有校验规则
+            if (value instanceof Collection){  //请求参数：List<基本类型>
+                Collection collection = (Collection)value;
+                //if (ValidateUtils.collectionSize0HasEmpty(collection)){
+                //    msgThreadLocal.get().add(createFailMsg(rules));
+                //}
+                for (Object elem:collection){
+                    checkRuleValueDetail(rules, elem);
                 }
             }else {
                 checkRuleValueDetail(rules, value);  //请求参数：基本类型
@@ -139,21 +142,42 @@ public class ValidateMain {
     }
 
     //详细规则校验
-    private void checkRuleValueDetail(Map<String, Object> jsonRule, Object val) {
+    private void checkRuleValueDetail(Map<String, Object> jsonRule, Object valueObj) {
         Object minValue = jsonRule.get(PvMsg.MIN_VALUE);
         Object maxValue = jsonRule.get(PvMsg.MAX_VALUE);
         Object minLength = jsonRule.get(PvMsg.MIN_LENGTH);
         Object maxLength = jsonRule.get(PvMsg.MAX_LENGTH);
         String regex = ValidateUtils.objToStr(jsonRule.get(PvMsg.REGEX));
+        boolean noPass = false;
+        //最小值
+        if (ValidateUtils.isNotBlankObj(minValue)){
+            try {
+                BigDecimal value = new BigDecimal(ValidateUtils.objToStr(valueObj));
+                if (value.compareTo(new BigDecimal(ValidateUtils.objToStr(minValue))) == -1){
+                    noPass = true;
+                }
+            }catch (NumberFormatException e){
+                ValidateUtils.logSevere(String.format("数字转换异常，参数值->%s，rule->%s", valueObj, jsonRule.toString()), e);
+                noPass = true;
+            }
+        }
+        //最大值
+        if (ValidateUtils.isNotBlankObj(maxValue)){
+            try {
+                BigDecimal value = new BigDecimal(ValidateUtils.objToStr(valueObj));
+                if (value.compareTo(new BigDecimal(ValidateUtils.objToStr(maxValue))) == 1){
+                    noPass = true;
+                }
+            }catch (NumberFormatException e){
+                ValidateUtils.logSevere(String.format("数字转换异常，参数值->%s，rule->%s", valueObj, jsonRule.toString()), e);
+                noPass = true;
+            }
+        }
 
-        //校验不通过
-        if (ValidateUtils.isNotBlankObj(minValue) && ValidateUtils.getDouble(val) < ValidateUtils.getDouble(minValue)
-            || ValidateUtils.isNotBlankObj(maxValue) && ValidateUtils.getBigDecimal(val).compareTo(ValidateUtils.getBigDecimal(maxValue)) >= 1
-            ||  ValidateUtils.isNotBlankObj(minLength) && ValidateUtils.objToStr(val).length() < ValidateUtils.getDouble(minLength)
-            || ValidateUtils.isNotBlankObj(maxLength) && ValidateUtils.objToStr(val).length() > ValidateUtils.getDouble(maxLength)){
-
-            msgThreadLocal.get().add(createFailMsg(jsonRule));
-            return;
+        //长度校验
+        if (ValidateUtils.isNotBlankObj(minLength) && ValidateUtils.objToStr(valueObj).length() < ValidateUtils.getDouble(minLength)
+            || ValidateUtils.isNotBlankObj(maxLength) && ValidateUtils.objToStr(valueObj).length() > ValidateUtils.getDouble(maxLength)){
+            noPass = true;
         }
 
         //正则校验
@@ -165,10 +189,15 @@ public class ValidateMain {
 
                 regex = result.get(regex);
             }
-
-            if (!Pattern.matches(regex, ValidateUtils.objToStr(val))){
-                msgThreadLocal.get().add(createFailMsg(jsonRule));
+            Pattern pattern = Pattern.compile(regex, Pattern.CASE_INSENSITIVE);
+            if (!pattern.matcher(ValidateUtils.objToStr(valueObj)).matches()){
+                noPass = true;
             }
+        }
+
+        //校验未通过
+        if (noPass){
+            msgThreadLocal.get().add(createFailMsg(jsonRule));
         }
     }
 
