@@ -13,7 +13,7 @@ import java.util.logging.Logger;
 /**
  * author chenpiqian 2018-05-25
  */
-public class ValidateUtils<T> extends org.springframework.util.StringUtils{
+public class PvUtil<T> extends org.springframework.util.StringUtils{
 
     private static final Logger LOGGER = Logger.getLogger("@ParamsValidate");
 
@@ -111,17 +111,17 @@ public class ValidateUtils<T> extends org.springframework.util.StringUtils{
     }
 
     //rule中包含request:true
-    public static boolean isRequestTrue(Map<String, Object> rules){
+    public static boolean hasRequestTrue(Map<String, Object> rules){
         return Boolean.parseBoolean(objToStr(rules.get(PvMsg.REQUEST)));
     }
 
     //校验规则，request是否为false
-    public static boolean isRequestFalse(Map<String, Object> rules){
+    public static boolean hasRequestFalse(Map<String, Object> rules){
         return "false".equals(objToStr(rules.get(PvMsg.REQUEST)).toLowerCase());
     }
 
     //obj、map中的value、list中的元素，全都是empty
-    public static boolean isDepthEmptyValue(Object obj){
+    public static boolean isDepthValueEmpty(Object obj){
         boolean isEmpty = true;
         if (obj instanceof Map){
             Map map = (Map)obj;
@@ -130,7 +130,7 @@ public class ValidateUtils<T> extends org.springframework.util.StringUtils{
                 while (iterator.hasNext()){
                     Map.Entry<String, Object> entry = iterator.next();
                     Object value = entry.getValue();
-                    isEmpty = isDepthEmptyValue(value);
+                    isEmpty = isDepthValueEmpty(value);
                     if (!isEmpty){
                         break;
                     }
@@ -138,16 +138,7 @@ public class ValidateUtils<T> extends org.springframework.util.StringUtils{
             }
         }else if (obj instanceof Collection){
             Collection collection = (Collection)obj;
-            if (collection.size() > 0){
-                Iterator it = collection.iterator();
-                while (it.hasNext()){
-                    Object value = it.next();
-                    isEmpty = isDepthEmptyValue(value);
-                    if (!isEmpty){
-                        break;
-                    }
-                }
-            }
+            isEmpty = collection.size() == 0;
         }else{
             isEmpty = isBlankObj(obj);
         }

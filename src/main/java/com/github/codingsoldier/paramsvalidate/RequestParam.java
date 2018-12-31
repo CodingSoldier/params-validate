@@ -28,7 +28,7 @@ public class RequestParam {
         Map<String, String[]> paramMap = request.getParameterMap();
         if (paramMap != null){
             for (Map.Entry<String, String[]> entry:paramMap.entrySet()){
-                if (ValidateUtils.isNotBlank(entry.getKey())){
+                if (PvUtil.isNotBlank(entry.getKey())){
                     if (entry.getValue().length == 1){
                         resultMap.put(entry.getKey(), entry.getValue()[0]);
                     }else{
@@ -67,7 +67,7 @@ public class RequestParam {
         mapper.setSerializationInclusion(JsonInclude.Include.NON_EMPTY);
         Map<String, Object> result = mapper.convertValue(obj, Map.class);
         //删除空值
-        ValidateUtils.deleteMapEmptyValue(result);
+        PvUtil.deleteMapEmptyValue(result);
         return result != null ? result : new HashMap<>();
     }
 

@@ -41,12 +41,12 @@ public abstract class ValidateInterfaceAdapter implements ValidateInterface{
                 String jsonMsg = elemMap.get(PvMsg.MESSAGE);
 
                 String message = "";
-                message = ValidateUtils.isNotBlankObj(jsonMsg) ? (message+jsonMsg+"，") : message;
+                message = PvUtil.isNotBlankObj(jsonMsg) ? (message+jsonMsg+"，") : message;
                 message = Boolean.TRUE.equals(requestVal) ? (message+"必填，") : message;
-                message = ValidateUtils.isNotBlankObj(minVal) ? (message+"最小值"+minVal+"，") : message;
-                message = ValidateUtils.isNotBlankObj(maxVal) ? (message+"最大值"+maxVal+"，") : message;
-                message = ValidateUtils.isNotBlankObj(minLen) ? (message+"最小长度"+minLen+"，") : message;
-                message = ValidateUtils.isNotBlankObj(maxLen) ? (message+"最大长度"+maxLen+"，") : message;
+                message = PvUtil.isNotBlankObj(minVal) ? (message+"最小值"+minVal+"，") : message;
+                message = PvUtil.isNotBlankObj(maxVal) ? (message+"最大值"+maxVal+"，") : message;
+                message = PvUtil.isNotBlankObj(minLen) ? (message+"最小长度"+minLen+"，") : message;
+                message = PvUtil.isNotBlankObj(maxLen) ? (message+"最大长度"+maxLen+"，") : message;
                 message = "".equals(message) ? "未通过校验，" : message;
                 message = message.substring(0, message.length()-1);
 

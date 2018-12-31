@@ -39,9 +39,9 @@ public class ValidateAspect {
         ValidateConfig validateConfig = getConfigs(joinPoint);
 
         //获取校验级别
-        String level = ValidateUtils.isNotBlank(validateConfig.getLevel()) ? validateConfig.getLevel() : validateInterface.getLevel();
+        String level = PvUtil.isNotBlank(validateConfig.getLevel()) ? validateConfig.getLevel() : validateInterface.getLevel();
         if (!(PvLevel.LOOSE.equals(level) || PvLevel.STRICT.equals(level))){
-            ValidateUtils.logWarning("@ParamsValidate校验级别设置错误，将使用默认[PvLevel.STRICT]校验级别");
+            PvUtil.logWarning("@ParamsValidate校验级别设置错误，将使用默认[PvLevel.STRICT]校验级别");
             level = PvLevel.STRICT;
         }
 
@@ -57,7 +57,7 @@ public class ValidateAspect {
                 //打印告警日志
                 MethodSignature methodSignature = (MethodSignature) joinPoint.getSignature();
                 Method method = methodSignature.getMethod();
-                ValidateUtils.logWarning("校验发生异常，校验级别为[PvLevel.LOOSE]，不校验", method, e);
+                PvUtil.logWarning("校验发生异常，校验级别为[PvLevel.LOOSE]，不校验", method, e);
             }
         }
         if (resultValidate.isPass()){  //校验通过
@@ -75,7 +75,7 @@ public class ValidateAspect {
         ValidateConfig validateConfig = new ValidateConfig();
         if (method.getAnnotation(ParamsValidate.class) != null){
             String file = method.getAnnotation(ParamsValidate.class).value();
-            file = ValidateUtils.isNotBlank(file) ? file : method.getAnnotation(ParamsValidate.class).file();
+            file = PvUtil.isNotBlank(file) ? file : method.getAnnotation(ParamsValidate.class).file();
             String key = method.getAnnotation(ParamsValidate.class).key();
             String level = method.getAnnotation(ParamsValidate.class).level();
             validateConfig.setFile(file);

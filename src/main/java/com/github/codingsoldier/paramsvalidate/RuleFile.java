@@ -26,8 +26,8 @@ public class RuleFile {
     //获取需要校验的json
     public Map<String, Object> ruleFileJsonToMap(ValidateConfig validateConfig, Set<String> paramKeySet) throws Exception{
         String basePath = validateInterface.basePath();
-        String filePath = ValidateUtils.trimBeginEndChar(basePath, '/') + "/"
-            + ValidateUtils.trimBeginChar(validateConfig.getFile(), '/');
+        String filePath = PvUtil.trimBeginEndChar(basePath, '/') + "/"
+            + PvUtil.trimBeginChar(validateConfig.getFile(), '/');
 
         Map<String, Object> json = validateInterface.getCache(validateConfig);
         if (json == null || json.size() == 0){
@@ -36,7 +36,7 @@ public class RuleFile {
                 throw new ParamsValidateException(String.format("读取%s,结果是null或者空json", filePath));
 
             String key = validateConfig.getKey();
-            if (ValidateUtils.isNotBlank(key)){
+            if (PvUtil.isNotBlank(key)){
                 Map<String, Object> jsonValue = (Map<String, Object>)json.get(key);
                 if (jsonValue == null)
                     throw new ParamsValidateException(String.format("%s文件中无key: %s", filePath, key));
@@ -57,7 +57,7 @@ public class RuleFile {
     private Map<String, Object> ruleFileRead(String filePath) throws Exception{
         Map<String, Object> json = null;
         Parser parser = validateInterface.getParser();
-        try (InputStream is = ValidateUtils.class.getClassLoader().getResourceAsStream(filePath)){
+        try (InputStream is = PvUtil.class.getClassLoader().getResourceAsStream(filePath)){
             if (is != null){
                 if (parser != null && parser.getParserClass() != null){
                     Class parserClazz = parser.getParserClass();
@@ -94,7 +94,7 @@ public class RuleFile {
                 if (regexCommon == null){
                     ObjectMapper mapper = new ObjectMapper();
                     String basePath = validateInterface.basePath();
-                    String filePath = ValidateUtils.trimBeginEndChar(basePath, '/') + "/"+ REGEX_COMMON_JSON;
+                    String filePath = PvUtil.trimBeginEndChar(basePath, '/') + "/"+ REGEX_COMMON_JSON;
                     try (InputStream is = this.getClass().getClassLoader().getResourceAsStream(filePath)){
                         if (is == null)
                             throw new ParamsValidateException(String.format("读取%s，结果为null", filePath));
