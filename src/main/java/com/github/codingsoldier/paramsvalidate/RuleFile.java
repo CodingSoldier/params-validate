@@ -13,6 +13,9 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
+/**
+ * author chenpiqian 2018-05-25
+ */
 @Component
 public class RuleFile {
 

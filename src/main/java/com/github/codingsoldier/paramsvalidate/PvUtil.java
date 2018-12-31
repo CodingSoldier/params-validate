@@ -105,19 +105,9 @@ public class PvUtil<T> extends org.springframework.util.StringUtils{
         return value instanceof String ? Double.parseDouble(objToStr(value)) : ((Number)value).doubleValue();
     }
 
-    //字符串转数字，数字转double
-    public static BigDecimal getBigDecimal(Object value){
-        return new BigDecimal(objToStr(value));
-    }
-
     //rule中包含request:true
     public static boolean hasRequestTrue(Map<String, Object> rules){
         return Boolean.parseBoolean(objToStr(rules.get(PvMsg.REQUEST)));
-    }
-
-    //校验规则，request是否为false
-    public static boolean hasRequestFalse(Map<String, Object> rules){
-        return "false".equals(objToStr(rules.get(PvMsg.REQUEST)).toLowerCase());
     }
 
     //obj、map中的value、list中的元素，全都是empty

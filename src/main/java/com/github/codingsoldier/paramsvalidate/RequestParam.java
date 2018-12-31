@@ -16,6 +16,9 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * author chenpiqian 2018-05-25
+ */
 @Component
 public class RequestParam {
 
