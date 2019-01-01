@@ -1,8 +1,8 @@
 package com.github.codingsoldier.paramsvalidate.bean;
 
-public class PvMsg {
+public class PvConst {
 
-    private PvMsg() {}
+    private PvConst() {}
 
     public static final String NAME = "name";  //请求参数名
 
@@ -13,5 +13,8 @@ public class PvMsg {
     public static final String MAX_LENGTH = "maxLength";
     public static final String REGEX = "regex";
     public static final String MESSAGE = "message";
+
+    public static final String WAS_COLLECTION = "wasCollection";
+    public static final String ELEM = "elem";
 
 }

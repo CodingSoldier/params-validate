@@ -1,6 +1,6 @@
 package com.github.codingsoldier.paramsvalidate;
 
-import com.github.codingsoldier.paramsvalidate.bean.PvMsg;
+import com.github.codingsoldier.paramsvalidate.bean.PvConst;
 import com.github.codingsoldier.paramsvalidate.bean.ResultValidate;
 import com.github.codingsoldier.paramsvalidate.bean.ValidateConfig;
 import org.aspectj.lang.JoinPoint;
@@ -21,16 +21,16 @@ public class ValidateMain {
 
     private static Set<String> ruleKeySet = new HashSet<>();
     static {
-        ruleKeySet.add(PvMsg.REQUEST);
-        ruleKeySet.add(PvMsg.MIN_VALUE);
-        ruleKeySet.add(PvMsg.MAX_VALUE);
-        ruleKeySet.add(PvMsg.MIN_LENGTH);
-        ruleKeySet.add(PvMsg.MAX_LENGTH);
-        ruleKeySet.add(PvMsg.REGEX);
-        ruleKeySet.add(PvMsg.MESSAGE);
+        ruleKeySet.add(PvConst.REQUEST);
+        ruleKeySet.add(PvConst.MIN_VALUE);
+        ruleKeySet.add(PvConst.MAX_VALUE);
+        ruleKeySet.add(PvConst.MIN_LENGTH);
+        ruleKeySet.add(PvConst.MAX_LENGTH);
+        ruleKeySet.add(PvConst.REGEX);
+        ruleKeySet.add(PvConst.MESSAGE);
     }
 
-    private ThreadLocal<List<Map<String, String>>> msgThreadLocal = new ThreadLocal<>();  //错误提示信息
+    private ThreadLocal<List<Map<String, String>>> msgListThreadLocal = new ThreadLocal<>();  //错误提示信息
     private ThreadLocal<String> ruleKeyThreadLocal = new ThreadLocal<>();  //规则的key
 
     @Autowired
@@ -43,16 +43,16 @@ public class ValidateMain {
         ResultValidate resultValidate = new ResultValidate(true);  //默认是校验通过
         if (PvUtil.isNotBlank(validateConfig.getFile())){  //需要校验
             //初始化list
-            msgThreadLocal.set(new ArrayList<>());
+            msgListThreadLocal.set(new ArrayList<>());
             //获取请求参数
             Map<String, Object> allParam = requestParam.mergeParams(joinPoint);
             //获取校验规则
             Map<String, Object> json = ruleFile.ruleFileJsonToMap(validateConfig, allParam.keySet());
             //执行校验
-            validateJsonParam(json, allParam);
-            if (msgThreadLocal.get().size() > 0){
+            validateJsonParamHandler(json, allParam);
+            if (msgListThreadLocal.get().size() > 0){
                 resultValidate.setPass(false);
-                resultValidate.setMsgList(msgThreadLocal.get());
+                resultValidate.setMsgList(msgListThreadLocal.get());
             }
         }
         return resultValidate;
@@ -63,21 +63,29 @@ public class ValidateMain {
      * @param json
      * @param paramMap 不可以为null
      */
-    private void validateJsonParam(Map<String, Object> json, Map<String, Object> paramMap){
+    private void validateJsonParamHandler(Map<String, Object> json, Map<String, Object> paramMap){
         if (json == null || json.size() == 0)  //没有校验规则，退出
             return ;
 
         //循环校验json
         for (Map.Entry<String, Object> jsonEntry:json.entrySet()){
-            if (!(jsonEntry.getValue() instanceof Map))  //对象校验有request
+            if (!(jsonEntry.getValue() instanceof Map)){  //对象校验有request
                 continue;
-
+            }
             Map<String, Object> jsonValue = (Map<String, Object>)jsonEntry.getValue();
             String key = jsonEntry.getKey();
             Object paramValue = paramMap.get(key);
             ruleKeyThreadLocal.set(key);
+
             if (ruleKeySet.containsAll(jsonValue.keySet())){   //jsonValue为校验规则rules
                 checkRuleParamValue(jsonValue, paramValue, key);
+            }else if (PvUtil.isTrue(jsonValue.get(PvConst.WAS_COLLECTION))){
+                if (!PvUtil.isFalse(jsonValue.get(PvConst.REQUEST)) ) {
+
+                }else{
+                    checkList(jsonValue, (Collection)paramValue, key);
+                }
+
 
                 /**
                  * request:false   paramValue is depthEmpty  不再校验
@@ -85,34 +93,54 @@ public class ValidateMain {
                  * request:null    paramValue is depthEmpty  校验
                  * request:null    paramValue no Empty       校验
                  */
-            }else if (!("false".equals(PvUtil.objToStr(jsonValue.get(PvMsg.REQUEST)).toLowerCase())
-                    && PvUtil.isDepthValueEmpty(paramValue))){
+            }else if (!(PvUtil.isFalse(jsonValue.get(PvConst.REQUEST)) && PvUtil.isDepthValueEmpty(paramValue))){
 
                 if (PvUtil.isEmptySize0(paramValue)){  //request:null  paramValue isEmptySize0  校验
                     checkNoRequestFalseButEmptySize0(jsonValue);
                 }else if (paramValue instanceof Map){  //paramValue是一个key-value
-                    validateJsonParam(jsonValue, (Map<String, Object>)paramValue);
-                }else if (paramValue instanceof List){  //paramValue是一个List
-                    List paramList = (List)paramValue;
-                    for (Object elem:paramList){
+                    validateJsonParamHandler(jsonValue, (Map<String, Object>)paramValue);
+                }else if (paramValue instanceof Collection){  //paramValue是一个List
+                    Collection paramCollection = (Collection)paramValue;
+                    for (Object elem:paramCollection){
                         if (!(elem instanceof Map)){
                             throw new ParamsValidateException(String.format("传参或者校验规则错误，校验规则：%s，请求参数：%s", jsonValue, elem));
                         }
-                        validateJsonParam(jsonValue, (Map<String, Object>)elem);
+                        validateJsonParamHandler(jsonValue, (Map<String, Object>)elem);
                     }
                 }else {
                     throw new ParamsValidateException(String.format("传参或者校验规则错误，校验规则：%s，请求参数：%s", jsonValue, paramValue));
                 }
             }
         }
+    }
 
+    private void checkList( Map<String, Object> jsonValue, Collection paramValue, String key){
+
+        String minStr = PvUtil.objToStr(jsonValue.get(PvConst.MIN_LENGTH));
+        String maxStr = PvUtil.objToStr(jsonValue.get(PvConst.MAX_LENGTH));
+        boolean noPass = PvUtil.isNotBlank(minStr) && paramValue.size() < Integer.parseInt(minStr) ? true : false;
+        noPass = PvUtil.isNotBlank(maxStr) && paramValue.size() > Integer.parseInt(maxStr) ? true : noPass;
+
+        if (noPass){
+            addFailMsg(jsonValue);
+        }
+
+        if (jsonValue.get(PvConst.ELEM) instanceof Map){
+            Map jsonEntry = new HashMap();
+            Map paramEntry = new HashMap();
+            jsonEntry.put(String.format("%s.%s",key,PvConst.ELEM), jsonValue.get(PvConst.ELEM));
+            for (Object paramElem:paramValue){
+                paramEntry.put(String.format("%s.%s",key,PvConst.ELEM), paramElem);
+                validateJsonParamHandler(jsonEntry, paramEntry);
+            }
+        }
     }
 
     //request:null  paramValue isEmptySize0  校验
     private void checkNoRequestFalseButEmptySize0(Map<String, Object> json){
         Set<String> jsonKeySet = json.keySet();
-        if (ruleKeySet.containsAll(jsonKeySet) && PvUtil.hasRequestTrue(json)){
-            msgThreadLocal.get().add(createFailMsg(json));
+        if (ruleKeySet.containsAll(jsonKeySet) && PvUtil.isTrue(json.get(PvConst.REQUEST))){
+            addFailMsg(json);
         }else {
             for (String key:jsonKeySet){
                 if (json.get(key) instanceof Map){
@@ -129,9 +157,9 @@ public class ValidateMain {
      * 只校验请求参数是否可为空
      */
     private void checkRuleParamValue(Map<String, Object> rules, Object value, String key){
-        if (PvUtil.hasRequestTrue(rules)  //必填&&无值
+        if (PvUtil.isTrue(rules.get(PvConst.REQUEST))  //必填&&无值
                 && (PvUtil.isBlankObj(value) || (value instanceof List && PvUtil.collectionSize0HasEmpty((List)value)))){
-            msgThreadLocal.get().add(createFailMsg(rules));
+            addFailMsg(rules);
         }else if (PvUtil.isNotBlankObj(value)){  //有值（Collection<基本类型>中的元素可能是empty）&&有校验规则
             if (value instanceof Collection){
                 //请求参数：Collection<基本类型>
@@ -154,11 +182,11 @@ public class ValidateMain {
      * valueObj属于Map的value，valueObj为Empty，不进入此方法，校验
      */
     private void checkRuleValueDetail(Map<String, Object> jsonRule, Object valueObj) {
-        Object minValue = jsonRule.get(PvMsg.MIN_VALUE);
-        Object maxValue = jsonRule.get(PvMsg.MAX_VALUE);
-        Object minLength = jsonRule.get(PvMsg.MIN_LENGTH);
-        Object maxLength = jsonRule.get(PvMsg.MAX_LENGTH);
-        String regex = PvUtil.objToStr(jsonRule.get(PvMsg.REGEX));
+        Object minValue = jsonRule.get(PvConst.MIN_VALUE);
+        Object maxValue = jsonRule.get(PvConst.MAX_VALUE);
+        Object minLength = jsonRule.get(PvConst.MIN_LENGTH);
+        Object maxLength = jsonRule.get(PvConst.MAX_LENGTH);
+        String regex = PvUtil.objToStr(jsonRule.get(PvConst.REGEX));
         boolean noPass = false;
         //最小值
         if (PvUtil.isNotBlankObj(minValue)){
@@ -208,23 +236,23 @@ public class ValidateMain {
 
         //校验未通过
         if (noPass){
-            msgThreadLocal.get().add(createFailMsg(jsonRule));
+            addFailMsg(jsonRule);
         }
     }
 
     //返回错误提示
-    private Map<String, String> createFailMsg(Map<String, Object> jsonRule){
+    private void addFailMsg(Map<String, Object> jsonRule){
         Map<String, String> msgMap = new HashMap<>();
-        msgMap.put(PvMsg.NAME, ruleKeyThreadLocal.get());
-        ruleKeyThreadLocal.remove();
+        msgMap.put(PvConst.NAME, ruleKeyThreadLocal.get());
         for (Map.Entry<String, Object> entry:jsonRule.entrySet()){
             String key = entry.getKey();
             String value = PvUtil.objToStr(entry.getValue());
-            if (PvUtil.isNotBlank(key) && PvUtil.isNotBlank(value)){
+            if (PvUtil.isNotBlank(key) && ruleKeySet.contains(key) && PvUtil.isNotBlank(value)){
                 msgMap.put(key, value);
             }
         }
-        return msgMap;
+        msgListThreadLocal.get().add(msgMap);
+        ruleKeyThreadLocal.remove();
     }
 
 }

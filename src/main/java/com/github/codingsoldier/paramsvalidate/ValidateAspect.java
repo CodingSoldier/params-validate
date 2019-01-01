@@ -41,7 +41,6 @@ public class ValidateAspect {
         //获取校验级别
         String level = PvUtil.isNotBlank(validateConfig.getLevel()) ? validateConfig.getLevel() : validateInterface.getLevel();
         if (!(PvLevel.LOOSE.equals(level) || PvLevel.STRICT.equals(level))){
-            PvUtil.logWarning("@ParamsValidate校验级别设置错误，将使用默认[PvLevel.STRICT]校验级别");
             level = PvLevel.STRICT;
         }
 

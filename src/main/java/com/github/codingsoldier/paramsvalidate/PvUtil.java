@@ -1,7 +1,5 @@
 package com.github.codingsoldier.paramsvalidate;
 
-import com.github.codingsoldier.paramsvalidate.bean.PvMsg;
-
 import java.lang.reflect.Method;
 import java.math.BigDecimal;
 import java.util.Collection;
@@ -106,8 +104,12 @@ public class PvUtil<T> extends org.springframework.util.StringUtils{
     }
 
     //rule中包含request:true
-    public static boolean hasRequestTrue(Map<String, Object> rules){
-        return Boolean.parseBoolean(objToStr(rules.get(PvMsg.REQUEST)));
+    public static boolean isTrue(Object ojb){
+        return "true".equals(objToStr(ojb).toLowerCase());
+    }
+
+    public static boolean isFalse(Object ojb){
+        return "false".equals(objToStr(ojb).toLowerCase());
     }
 
     //obj、map中的value、list中的元素，全都是empty
