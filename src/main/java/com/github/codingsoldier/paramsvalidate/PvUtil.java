@@ -7,6 +7,7 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.regex.Pattern;
 
 /**
  * author chenpiqian 2018-05-25
@@ -100,7 +101,21 @@ public class PvUtil<T> extends org.springframework.util.StringUtils{
 
     //字符串转数字，数字转double
     public static double getDouble(Object value){
-        return value instanceof String ? Double.parseDouble(objToStr(value)) : ((Number)value).doubleValue();
+        return Double.parseDouble(objToStr(value));
+    }
+
+    //对象转Integer
+    public static Integer objToInteger(Object obj) {
+        if (obj == null)
+            return null;
+        String str = objToStr(obj);
+        Pattern pattern = Pattern.compile("^[0-9]+$");
+        boolean flagNum = pattern.matcher(str).matches();
+        boolean flagMax = false;
+        if (isNotBlank(str)){
+            flagMax = new BigDecimal(Integer.MAX_VALUE).compareTo(new BigDecimal(str)) > -1;
+        }
+        return flagNum && flagMax ? Integer.parseInt(str) : null;
     }
 
     //rule中包含request:true

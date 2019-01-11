@@ -79,34 +79,33 @@ public class ValidateMain {
 
             if (ruleKeySet.containsAll(jsonValue.keySet())){   //jsonValue为校验规则rules
                 checkRuleParamValue(jsonValue, paramValue, key);
-            }else if (PvUtil.isTrue(jsonValue.get(PvConst.WAS_COLLECTION))){
-                if (!PvUtil.isFalse(jsonValue.get(PvConst.REQUEST)) ) {
 
-                }else{
-                    checkList(jsonValue, (Collection)paramValue, key);
-                }
-
+            //}else if ( PvUtil.isTrue(jsonValue.get(PvConst.WAS_COLLECTION)) ){
+            //    if ( !(PvUtil.isFalse(jsonValue.get(PvConst.REQUEST)) && PvUtil.isBlankObj(paramValue))) {
+            //        checkCollection(jsonValue, paramValue, key);
+            //    }
 
                 /**
-                 * request:false   paramValue is depthEmpty  不再校验
-                 * request:false   paramValue no Empty       校验
-                 * request:null    paramValue is depthEmpty  校验
-                 * request:null    paramValue no Empty       校验
+                 * request:false   paramValue   Empty   不再校验
+                 * request:false   paramValue  noEmpty  校验
+                 * request:null    paramValue   Empty   校验
+                 * request:null    paramValue  noEmpty  校验
                  */
-            }else if (!(PvUtil.isFalse(jsonValue.get(PvConst.REQUEST)) && PvUtil.isDepthValueEmpty(paramValue))){
+            }else if (!(PvUtil.isFalse(jsonValue.get(PvConst.REQUEST)) && PvUtil.isBlankObj(paramValue))){
 
-                if (PvUtil.isEmptySize0(paramValue)){  //request:null  paramValue isEmptySize0  校验
-                    checkNoRequestFalseButEmptySize0(jsonValue);
+                if (PvUtil.isBlankObj(paramValue)){  //request:null  paramValue  Empty  校验
+                    checkNoRequestFalseButEmpty(jsonValue);
                 }else if (paramValue instanceof Map){  //paramValue是一个key-value
                     validateJsonParamHandler(jsonValue, (Map<String, Object>)paramValue);
                 }else if (paramValue instanceof Collection){  //paramValue是一个List
-                    Collection paramCollection = (Collection)paramValue;
-                    for (Object elem:paramCollection){
-                        if (!(elem instanceof Map)){
-                            throw new ParamsValidateException(String.format("传参或者校验规则错误，校验规则：%s，请求参数：%s", jsonValue, elem));
-                        }
-                        validateJsonParamHandler(jsonValue, (Map<String, Object>)elem);
-                    }
+                    //Collection paramCollection = (Collection)paramValue;
+                    //for (Object elem:paramCollection){
+                    //    if (!(elem instanceof Map)){
+                    //        throw new ParamsValidateException(String.format("传参或者校验规则错误，校验规则：%s，请求参数：%s", jsonValue, elem));
+                    //    }
+                    //    validateJsonParamHandler(jsonValue, (Map<String, Object>)elem);
+                    //}
+                    checkCollection(jsonValue, (Collection)paramValue, key);
                 }else {
                     throw new ParamsValidateException(String.format("传参或者校验规则错误，校验规则：%s，请求参数：%s", jsonValue, paramValue));
                 }
@@ -114,30 +113,37 @@ public class ValidateMain {
         }
     }
 
-    private void checkList( Map<String, Object> jsonValue, Collection paramValue, String key){
+    //参数值是Collection
+    private void checkCollection(Map<String, Object> jsonValue, Collection paramValue, String key){
 
-        String minStr = PvUtil.objToStr(jsonValue.get(PvConst.MIN_LENGTH));
-        String maxStr = PvUtil.objToStr(jsonValue.get(PvConst.MAX_LENGTH));
-        boolean noPass = PvUtil.isNotBlank(minStr) && paramValue.size() < Integer.parseInt(minStr) ? true : false;
-        noPass = PvUtil.isNotBlank(maxStr) && paramValue.size() > Integer.parseInt(maxStr) ? true : noPass;
+        Integer min = PvUtil.objToInteger(jsonValue.get(PvConst.MIN_LENGTH));
+        Integer max = PvUtil.objToInteger(jsonValue.get(PvConst.MAX_LENGTH));
+        boolean noPass = min != null && paramValue.size() < min ? true : false;
+        noPass = max != null && paramValue.size() > max ? true : noPass;
 
         if (noPass){
             addFailMsg(jsonValue);
         }
 
         if (jsonValue.get(PvConst.ELEM) instanceof Map){
+            Map elemValue = (Map) jsonValue.get(PvConst.ELEM);
             Map jsonEntry = new HashMap();
             Map paramEntry = new HashMap();
-            jsonEntry.put(String.format("%s.%s",key,PvConst.ELEM), jsonValue.get(PvConst.ELEM));
-            for (Object paramElem:paramValue){
-                paramEntry.put(String.format("%s.%s",key,PvConst.ELEM), paramElem);
-                validateJsonParamHandler(jsonEntry, paramEntry);
+            jsonEntry.put(String.format("%s.%s",key,PvConst.ELEM), elemValue);
+            if (paramValue.size() != 0){
+                for (Object paramElem:paramValue){
+                    paramEntry.put(String.format("%s.%s",key,PvConst.ELEM), paramElem);
+                    validateJsonParamHandler(jsonEntry, paramEntry);
+                }
+            }else if (!PvUtil.isFalse(elemValue.get(PvConst.REQUEST))){
+                checkNoRequestFalseButEmpty(elemValue);
             }
+
         }
     }
 
-    //request:null  paramValue isEmptySize0  校验
-    private void checkNoRequestFalseButEmptySize0(Map<String, Object> json){
+    //request:null  paramValue is empty  校验
+    private void checkNoRequestFalseButEmpty(Map<String, Object> json){
         Set<String> jsonKeySet = json.keySet();
         if (ruleKeySet.containsAll(jsonKeySet) && PvUtil.isTrue(json.get(PvConst.REQUEST))){
             addFailMsg(json);
@@ -146,7 +152,7 @@ public class ValidateMain {
                 if (json.get(key) instanceof Map){
                     ruleKeyThreadLocal.set(key);
                     //json对象的rule是否仍然有request:true
-                    checkNoRequestFalseButEmptySize0((Map<String, Object>) json.get(key));
+                    checkNoRequestFalseButEmpty((Map<String, Object>) json.get(key));
                 }
             }
         }
@@ -157,22 +163,22 @@ public class ValidateMain {
      * 只校验请求参数是否可为空
      */
     private void checkRuleParamValue(Map<String, Object> rules, Object value, String key){
-        if (PvUtil.isTrue(rules.get(PvConst.REQUEST))  //必填&&无值
-                && (PvUtil.isBlankObj(value) || (value instanceof List && PvUtil.collectionSize0HasEmpty((List)value)))){
-            addFailMsg(rules);
-        }else if (PvUtil.isNotBlankObj(value)){  //有值（Collection<基本类型>中的元素可能是empty）&&有校验规则
-            if (value instanceof Collection){
-                //请求参数：Collection<基本类型>
-                Collection collection = (Collection)value;
-                for (Object elem:collection){
-                    ruleKeyThreadLocal.set(key);
-                    //elem是Collection中的元素，为空也校验
-                    checkRuleValueDetail(rules, elem);
-                }
-            }else {
-                //value是Map中的value（基本类型），value非空，才能进入详情校验方法
-                checkRuleValueDetail(rules, value);
-            }
+        if (PvUtil.isTrue(rules.get(PvConst.REQUEST)) && PvUtil.isBlankObj(value)){
+            addFailMsg(rules);  //必填&&无值
+        }else if (PvUtil.isNotBlankObj(value)){  //有值&&有校验规则
+            //if (value instanceof Collection){
+            //    //请求参数：Collection<基本类型>
+            //    Collection collection = (Collection)value;
+            //    for (Object elem:collection){
+            //        ruleKeyThreadLocal.set(key);
+            //        //elem是Collection中的元素，为空也校验
+            //        checkRuleValueDetail(rules, elem);
+            //    }
+            //}else {
+            //    //value是Map中的value（基本类型），value非空，才能进入详情校验方法
+            //    checkRuleValueDetail(rules, value);
+            //}
+            checkRuleValueDetail(rules, value);
         }
     }
 
@@ -241,10 +247,10 @@ public class ValidateMain {
     }
 
     //返回错误提示
-    private void addFailMsg(Map<String, Object> jsonRule){
+    private void addFailMsg(Map<String, Object> json){
         Map<String, String> msgMap = new HashMap<>();
         msgMap.put(PvConst.NAME, ruleKeyThreadLocal.get());
-        for (Map.Entry<String, Object> entry:jsonRule.entrySet()){
+        for (Map.Entry<String, Object> entry:json.entrySet()){
             String key = entry.getKey();
             String value = PvUtil.objToStr(entry.getValue());
             if (PvUtil.isNotBlank(key) && ruleKeySet.contains(key) && PvUtil.isNotBlank(value)){

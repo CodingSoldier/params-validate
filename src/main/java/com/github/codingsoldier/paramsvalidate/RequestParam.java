@@ -1,6 +1,5 @@
 package com.github.codingsoldier.paramsvalidate;
 
-import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.aspectj.lang.JoinPoint;
 import org.aspectj.lang.reflect.MethodSignature;
@@ -67,10 +66,10 @@ public class RequestParam {
     //body中的参数添加到map
     private Map<String, Object> bodyParamToMap(Object obj) throws IOException {
         ObjectMapper mapper = new ObjectMapper();
-        mapper.setSerializationInclusion(JsonInclude.Include.NON_EMPTY);
+        //mapper.setSerializationInclusion(JsonInclude.Include.NON_EMPTY);
         Map<String, Object> result = mapper.convertValue(obj, Map.class);
         //删除空值
-        PvUtil.deleteMapEmptyValue(result);
+        //PvUtil.deleteMapEmptyValue(result);
         return result != null ? result : new HashMap<>();
     }
 

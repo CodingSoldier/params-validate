@@ -14,7 +14,7 @@ public class PvConst {
     public static final String REGEX = "regex";
     public static final String MESSAGE = "message";
 
-    public static final String WAS_COLLECTION = "wasCollection";
+    //public static final String WAS_COLLECTION = "wasCollection";
     public static final String ELEM = "elem";
 
 }
