@@ -92,7 +92,6 @@ public class ValidateMain {
                  * request:null    paramValue  noEmpty  校验
                  */
             }else if (!(PvUtil.isFalse(jsonValue.get(PvConst.REQUEST)) && PvUtil.isBlankObj(paramValue))){
-
                 if (PvUtil.isBlankObj(paramValue)){  //request:null  paramValue  Empty  校验
                     checkNoRequestFalseButEmpty(jsonValue);
                 }else if (paramValue instanceof Map){  //paramValue是一个key-value
@@ -126,17 +125,17 @@ public class ValidateMain {
         }
 
         if (jsonValue.get(PvConst.ELEM) instanceof Map){
-            Map elemValue = (Map) jsonValue.get(PvConst.ELEM);
+            Map jsonElemValue = (Map) jsonValue.get(PvConst.ELEM);
             Map jsonEntry = new HashMap();
             Map paramEntry = new HashMap();
-            jsonEntry.put(String.format("%s.%s",key,PvConst.ELEM), elemValue);
+            jsonEntry.put(String.format("%s.%s",key,PvConst.ELEM), jsonElemValue);
             if (paramValue.size() != 0){
                 for (Object paramElem:paramValue){
                     paramEntry.put(String.format("%s.%s",key,PvConst.ELEM), paramElem);
                     validateJsonParamHandler(jsonEntry, paramEntry);
                 }
-            }else if (!PvUtil.isFalse(elemValue.get(PvConst.REQUEST))){
-                checkNoRequestFalseButEmpty(elemValue);
+            }else if (!(PvUtil.isFalse(jsonElemValue.get(PvConst.REQUEST)))){
+                checkNoRequestFalseButEmpty(jsonElemValue);
             }
 
         }

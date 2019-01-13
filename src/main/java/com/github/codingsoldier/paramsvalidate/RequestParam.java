@@ -66,10 +66,7 @@ public class RequestParam {
     //body中的参数添加到map
     private Map<String, Object> bodyParamToMap(Object obj) throws IOException {
         ObjectMapper mapper = new ObjectMapper();
-        //mapper.setSerializationInclusion(JsonInclude.Include.NON_EMPTY);
-        Map<String, Object> result = mapper.convertValue(obj, Map.class);
-        //删除空值
-        //PvUtil.deleteMapEmptyValue(result);
+        Map<String, Object> result = mapper.readValue(mapper.writeValueAsString(obj), Map.class);
         return result != null ? result : new HashMap<>();
     }
 

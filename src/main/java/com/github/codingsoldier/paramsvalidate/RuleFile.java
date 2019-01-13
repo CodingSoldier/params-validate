@@ -44,7 +44,7 @@ public class RuleFile {
                 if (jsonValue == null)
                     throw new ParamsValidateException(String.format("%s文件中无key: %s", filePath, key));
 
-                if (paramKeySet.contains(key)){
+                if (paramKeySet.contains(key) || paramKeySet.size() == 0){
                     json = new HashMap<>();
                     json.put(key, jsonValue);
                 }else {
