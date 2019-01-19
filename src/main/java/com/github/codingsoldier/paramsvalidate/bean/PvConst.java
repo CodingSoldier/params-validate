@@ -14,7 +14,9 @@ public class PvConst {
     public static final String REGEX = "regex";
     public static final String MESSAGE = "message";
 
-    //public static final String WAS_COLLECTION = "wasCollection";
     public static final String ELEM = "elem";
+
+    public static final String LEVEL_STRICT = "STRICT";  //严格模式，发生异常，校验不通过，默认
+    public static final String LEVEL_LOOSE = "LOOSE";    //宽松模式，发生异常，不校验
 
 }

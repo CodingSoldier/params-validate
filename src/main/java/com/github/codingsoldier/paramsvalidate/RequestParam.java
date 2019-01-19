@@ -52,7 +52,7 @@ public class RequestParam {
             outFor:for (int oi=0; oi < arr2.length; oi++){
                 if (arr2[oi] != null){
                     for (int ii=0; ii < arr2[oi].length; ii++){
-                        if ("RequestBody".equals(arr2[oi][ii].annotationType().getSimpleName())){
+                        if (arr2[oi][ii] instanceof  org.springframework.web.bind.annotation.RequestBody ){
                             result = joinPoint.getArgs()[oi];
                             break outFor;
                         }
@@ -78,10 +78,10 @@ public class RequestParam {
         HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder.getRequestAttributes()).getRequest();
         Map<String, Object> paramMap = getParamFromRequest(request);
 
-        for (Map.Entry<String, Object> entry:bodyMap.entrySet()){
-            paramMap.put(entry.getKey(), entry.getValue());
+        for (Map.Entry<String, Object> entry:paramMap.entrySet()){
+            bodyMap.put(entry.getKey(), entry.getValue());
         }
-        return paramMap;
+        return bodyMap;
     }
 
 }

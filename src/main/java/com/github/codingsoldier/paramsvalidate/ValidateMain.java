@@ -47,7 +47,7 @@ public class ValidateMain {
             //获取请求参数
             Map<String, Object> allParam = requestParam.mergeParams(joinPoint);
             //获取校验规则
-            Map<String, Object> json = ruleFile.ruleFileJsonToMap(validateConfig, allParam.keySet());
+            Map<String, Object> json = ruleFile.fileJsonToMap(validateConfig, allParam.keySet());
             //执行校验
             validateJsonParamHandler(json, allParam);
             if (msgListThreadLocal.get().size() > 0){
@@ -79,12 +79,6 @@ public class ValidateMain {
 
             if (ruleKeySet.containsAll(jsonValue.keySet())){   //jsonValue为校验规则rules
                 checkRuleParamValue(jsonValue, paramValue, key);
-
-            //}else if ( PvUtil.isTrue(jsonValue.get(PvConst.WAS_COLLECTION)) ){
-            //    if ( !(PvUtil.isFalse(jsonValue.get(PvConst.REQUEST)) && PvUtil.isBlankObj(paramValue))) {
-            //        checkCollection(jsonValue, paramValue, key);
-            //    }
-
                 /**
                  * request:false   paramValue   Empty   不再校验
                  * request:false   paramValue  noEmpty  校验
@@ -97,13 +91,6 @@ public class ValidateMain {
                 }else if (paramValue instanceof Map){  //paramValue是一个key-value
                     validateJsonParamHandler(jsonValue, (Map<String, Object>)paramValue);
                 }else if (paramValue instanceof Collection){  //paramValue是一个List
-                    //Collection paramCollection = (Collection)paramValue;
-                    //for (Object elem:paramCollection){
-                    //    if (!(elem instanceof Map)){
-                    //        throw new ParamsValidateException(String.format("传参或者校验规则错误，校验规则：%s，请求参数：%s", jsonValue, elem));
-                    //    }
-                    //    validateJsonParamHandler(jsonValue, (Map<String, Object>)elem);
-                    //}
                     checkCollection(jsonValue, (Collection)paramValue, key);
                 }else {
                     throw new ParamsValidateException(String.format("传参或者校验规则错误，校验规则：%s，请求参数：%s", jsonValue, paramValue));
@@ -165,18 +152,6 @@ public class ValidateMain {
         if (PvUtil.isTrue(rules.get(PvConst.REQUEST)) && PvUtil.isBlankObj(value)){
             addFailMsg(rules);  //必填&&无值
         }else if (PvUtil.isNotBlankObj(value)){  //有值&&有校验规则
-            //if (value instanceof Collection){
-            //    //请求参数：Collection<基本类型>
-            //    Collection collection = (Collection)value;
-            //    for (Object elem:collection){
-            //        ruleKeyThreadLocal.set(key);
-            //        //elem是Collection中的元素，为空也校验
-            //        checkRuleValueDetail(rules, elem);
-            //    }
-            //}else {
-            //    //value是Map中的value（基本类型），value非空，才能进入详情校验方法
-            //    checkRuleValueDetail(rules, value);
-            //}
             checkRuleValueDetail(rules, value);
         }
     }

@@ -18,13 +18,13 @@ public abstract class ValidateInterfaceAdapter implements ValidateInterface{
     }
 
     @Override
-    public Parser getParser() {
-        return null;
+    public String getLevel(){
+        return PvConst.LEVEL_STRICT;
     }
 
     @Override
-    public String getLevel(){
-        return PvLevel.STRICT;
+    public Parser getParser() {
+        return null;
     }
 
     @Override
@@ -61,12 +61,12 @@ public abstract class ValidateInterfaceAdapter implements ValidateInterface{
     }
 
     @Override
-    public Map<String, Object> getCache(ValidateConfig validateConfig) {
+    public Map<String, Object> getKeyCache(ValidateConfig validateConfig) {
         return new HashMap<>();
     }
 
     @Override
-    public void setCache(ValidateConfig validateConfig, Map<String, Object> json) {
+    public void setFileCache(ValidateConfig validateConfig, Map<String, Map<String, Object>> json) {
 
     }
 
