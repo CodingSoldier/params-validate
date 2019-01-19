@@ -101,9 +101,9 @@ public class ValidateMain {
 
     //参数值是Collection
     private void checkCollection(Map<String, Object> jsonValue, Collection paramValue, String key){
-
-        Integer min = PvUtil.objToInteger(jsonValue.get(PvConst.MIN_LENGTH));
-        Integer max = PvUtil.objToInteger(jsonValue.get(PvConst.MAX_LENGTH));
+        //坑爹gson，默认会把int类型转换为Double
+        Float min = PvUtil.objToFloat(jsonValue.get(PvConst.MIN_LENGTH));
+        Float max = PvUtil.objToFloat(jsonValue.get(PvConst.MAX_LENGTH));
         boolean noPass = min != null && paramValue.size() < min ? true : false;
         noPass = max != null && paramValue.size() > max ? true : noPass;
 

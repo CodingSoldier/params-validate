@@ -45,8 +45,8 @@ public abstract class ValidateInterfaceAdapter implements ValidateInterface{
                 message = Boolean.TRUE.equals(requestVal) ? (message+"必填，") : message;
                 message = PvUtil.isNotBlankObj(minVal) ? (message+"最小值"+minVal+"，") : message;
                 message = PvUtil.isNotBlankObj(maxVal) ? (message+"最大值"+maxVal+"，") : message;
-                message = PvUtil.isNotBlankObj(minLen) ? (message+"最小长度"+minLen+"，") : message;
-                message = PvUtil.isNotBlankObj(maxLen) ? (message+"最大长度"+maxLen+"，") : message;
+                message = PvUtil.isNotBlankObj(minLen) ? (message+"最小长度"+Float.valueOf(minLen).intValue()+"，") : message;
+                message = PvUtil.isNotBlankObj(maxLen) ? (message+"最大长度"+Float.valueOf(maxLen).intValue()+"，") : message;
                 message = "".equals(message) ? "未通过校验，" : message;
                 message = message.substring(0, message.length()-1);
 
