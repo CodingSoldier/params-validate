@@ -12,16 +12,36 @@ import java.util.Map;
  */
 public abstract class ValidateInterfaceAdapter implements ValidateInterface{
 
+    /**
+     * 默认根目录是resources/validate，json文件都放在此目录中
+     * 可在ValidateInterfaceAdapter子类覆盖此方法，改变默认根目录
+     */
     @Override
     public String basePath() {
         return "validate/";
     }
 
+    /**
+     * 校验级别
+     * PvConst.LEVEL_STRICT  严格模式，发生异常，校验不通过，默认
+     * PvConst.LEVEL_LOOSE   宽松模式，发生异常，不校验
+     *
+     * params-validate读取json文件或者son文件编写不合法等导致params-validate发生异常，默认是会拦截请求，不执行controller方法
+     * 若在ValidateInterfaceAdapter子类覆盖此方法，返回PvConst.LEVEL_LOOSE，当params-validate校验发生异常，就不校验了，放行请求，执行controller方法。
+     * 注意：当level设置为PvConst.LEVEL_LOOSE，在params-validate代码未发生异常的前提下，请求参数不符合校验规则，不会放行请求，params-validate返回校验信息给前端，controller方法不会执行。
+     */
     @Override
     public String getLevel(){
         return PvConst.LEVEL_STRICT;
     }
 
+    /**
+     * json解析器
+     * 1、使用默认解析器jackson，返回null
+     * 2、使用gson，请返回 new Parser(Gson.class)。需要引入gson依赖
+     * 3、使用fastjson，请返回new Parser(JSON.class, Feature[].class)。需要引入fastjson依赖
+     * 提供对gson、fastjson的支持是因为jackson不支持在json文件中写注释。为了支持fastjson，搞得好坑爹。
+     */
     @Override
     public Parser getParser() {
         return null;

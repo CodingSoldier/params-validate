@@ -27,15 +27,15 @@ public interface ValidateInterface {
 
     /**
      * json解析器
-     * 1、使用默认解析器jackson，可不覆盖此方法。
+     * 1、使用默认解析器jackson，不需要覆盖此方法。
      * 2、使用gson，请返回 new Parser(Gson.class)。
      * 3、使用fastjson，请返回new Parser(JSON.class, Feature[].class)。
-     * 为了支持fastjson，搞得好坑爹。
+     * 提供对gson、fastjson的支持是因为jackson不支持在json文件中写注释。为了支持fastjson，搞得好坑爹。
      */
     Parser getParser();
 
     /**
-     * 参数校验未通过
+     * 请求参数未通过校验
      * @param resultValidate
      * @return 返回给客户端的数据
      */
